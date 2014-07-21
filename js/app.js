@@ -82,7 +82,7 @@ app = {
 				app.local_tutorials_ids.splice(i, 1);
 			}
 
-			var tutorial = app.getTutorial(app.tutorials, { id : app.local_tutorials_ids[i] });
+			var tutorial = app.getTutorial({ id : app.local_tutorials_ids[i] });
 
 			if (tutorial) {
 				app.local_tutorials.push(tutorial);
@@ -94,7 +94,7 @@ app = {
 		if (!app.elems.local_tuts_list.firstChild) {
 			app.elems.local_tuts_empty = document.createElement('p');
 			app.elems.local_tuts_empty.className = 'alert-warning list-empty';
-			app.elems.local_tuts_empty.textContent = 'Vous n\'avez pas encore téléchargé de tutoriel.';
+			app.elems.local_tuts_empty.textContent = 'Aucun tutoriel local';
 
 			app.elems.local_tuts_list.parentNode.appendChild(app.elems.local_tuts_empty);
 		}
@@ -109,22 +109,23 @@ app = {
 				app.distant_tutorials_ids.splice(i, 1);
 			}
 
-			var tutorial = app.getTutorial(app.tutorials, { id : app.distant_tutorials_ids[i] });
+			var tutorial = app.getTutorial({ id : app.distant_tutorials_ids[i] });
 
 			if (tutorial) {
 				app.distant_tutorials.push(tutorial);
 			}
 		}
 
-		console.dir(app.distant_tutorials_ids);
-		console.dir(app.distant_tutorials);
+		// console.dir(app.distant_tutorials_ids);
+		// console.dir(app.distant_tutorials);
+		// return;
 
 		app.writeTutorialsList(app.elems.distant_tuts_list, app.distant_tutorials);
 
 		if (!app.elems.distant_tuts_list.firstChild) {
 			app.elems.distant_tuts_empty = document.createElement('p');
 			app.elems.distant_tuts_empty.className = 'alert-error list-empty';
-			app.elems.distant_tuts_empty.textContent = 'Impossible de récupérer les tutoriels en ligne';
+			app.elems.distant_tuts_empty.textContent = 'Aucun tutoriel en ligne';
 
 			app.elems.distant_tuts_list.parentNode.appendChild(app.elems.distant_tuts_empty);
 		}
@@ -139,6 +140,20 @@ app = {
 		// var menu = new gui.Menu();
 		// menu.append(new gui.MenuItem({ type: 'checkbox', label: 'box1' }));
 		// app.tray.menu = menu;
+	},
+
+	notify: function(opt) {
+		if (!opt.title) {
+			opt.title = app.title;
+		}
+		if (!opt.appIcon) {
+			opt.appIcon = app.path + 'img/icon-72x72.png';
+		}
+		if (!opt.contentImage) {
+			opt.contentImage = app.path + 'img/icon-72x72.png';
+		}
+
+		app.notifier.notify(opt);
 	},
 
 	writeTutorialsList: function (ul, tutorials) {
@@ -241,11 +256,12 @@ app = {
 
 				var tut = { id: parseInt(files[i]) };
 
-				var tutorial = app.getTutorial(app.local_tutorials, tut);
+				var tutorial = app.getTutorial(tut);
 
 				if (!tutorial) {
 					tutorial = tut;
 					app.local_tutorials.unshift(tutorial);
+					app.tutorials.unshift(tutorial);
 				}
 
 				app.writeTutorialsListItem(li, tutorial);
@@ -278,12 +294,7 @@ app = {
 			localStorage.setItem('tutorials', JSON.stringify(app.tutorials));
 
 			if (app.debug) {
-				app.notifier.notify({
-					title: app.title,
-					message: 'Tutoriels locaux mis à jour',
-					contentImage: app.path + 'img/icon-72x72.png',
-					appIcon: app.path + 'img/icon-72x72.png'
-				});
+				console.info('Tutoriels locaux mis à jour');
 			}
 		});
 	},
@@ -303,18 +314,19 @@ app = {
 			var articles = doc.getElementById('content').querySelectorAll('.tutorial-list>article');
 
 			for (var i=articles.length-1; i>=0; i--) {
-				var tut = { id: parseInt(articles[i].querySelector('a').getAttribute('href').replace(/\/tutoriels\/([\d]+)\/?(.*)/i, '$1')) };
+				var tut = { id: parseInt(articles[i].querySelector('a').getAttribute('href').trim().replace(/\/tutoriels\/([\d]+)\/?(.*)/i, '$1')) };
 
-				var tutorial = app.getTutorial(app.distant_tutorials, tut);
+				var tutorial = app.getTutorial(tut);
 
 				if (!tutorial) {
 					tutorial = tut;
 					app.distant_tutorials_ids.unshift(tutorial.id);
 					app.distant_tutorials.unshift(tutorial);
+					app.tutorials.unshift(tutorial);
 				}
 
 				tutorial.title = articles[i].querySelector('h3').textContent;
-				tutorial.url = articles[i].querySelector('a').getAttribute('href');
+				tutorial.url = articles[i].querySelector('a').getAttribute('href').trim();
 				tutorial.thumbnail = articles[i].querySelector('img.tutorial-img').getAttribute('src').replace(/^\/(.*)$/i, app.api_url + '$1');
 				tutorial.image = tutorial.thumbnail.replace(/(.60x60_q85_crop.)(png|jpg|gif)$/i, '');
 				tutorial.tags = articles[i].querySelector('.article-metadata').textContent.trim().split('\n').map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; });
@@ -330,12 +342,7 @@ app = {
 			localStorage.setItem('tutorials', JSON.stringify(app.tutorials));
 
 			if (app.debug) {
-				app.notifier.notify({
-					title: app.title,
-					message: 'Tutoriels distants mis à jour',
-					contentImage: app.path + 'img/icon-72x72.png',
-					appIcon: app.path + 'img/icon-72x72.png'
-				});
+				console.info('Tutoriels distants mis à jour');
 			}
 		});
 	},
