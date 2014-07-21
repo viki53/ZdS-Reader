@@ -6,6 +6,8 @@ Le but de l'application est de permettre de consulter les tutoriels de [ZdS](htt
 
 Notez que vous n'avez pas besoin d'avoir un compte ZdS pour utiliser l'appli.
 
+Cette application est basée sur [node-webkit](https://github.com/rogerwang/node-webkit), qui est donc nécessaire pour la faire fonctionner.
+
 ## Lancer l'application
 
 ### Configuration nécessaire
