@@ -193,7 +193,7 @@ app = {
 	},
 
 	refreshLocalTutorials: function () {
-		fs.readdir(app.path + 'data/tuts/', function(err, files) {
+		fs.readdir(app.path + 'data/tutorials/', function(err, files) {
 			if (err) {
 				console.error(err);
 				return;
@@ -218,7 +218,7 @@ app = {
 				app.writeTutorialsListItem(li, tutorial);
 
 				(function(li, tutorial) {
-					fs.readFile(app.path + 'data/tuts/' + files[i] + '/manifest.json', { encoding: 'UTF-8', flag: 'r' },	 function(err, manifest) {
+					fs.readFile(app.path + 'data/tutorials/' + files[i] + '/manifest.json', { encoding: 'UTF-8', flag: 'r' },	 function(err, manifest) {
 						if (err) {
 							console.error(err);
 							return;

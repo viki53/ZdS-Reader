@@ -23,4 +23,6 @@ Les chemins sont bien entendu à adapter en fonction de votre configuration
 
 ### Autres plateformes
 
-Les autres plateformes n'ont pas encore été testées mais ll devrait être possible de tester sous Windows ainsi que Linux.
+Les autres plateformes n'ont pas encore été testées mais ll devrait être possible de tester sous Windows (Growl requis) ainsi que Linux (`notify-send` requis).
+
+*[ZdS]: Zeste de Savoir
