@@ -1,0 +1,28 @@
+{
+	"name": "ZdS-Reader",
+	"title": "ZdS Reader",
+	"description": "Lisez vos tutoriels hors ligne",
+	"main": "html/index.html",
+	"window": {
+		"width": 960,
+		"height": 600,
+		"position": "center",
+		"toolbar": false,
+		"frame": true,
+		"icon": "img/logo-72x72.png"
+	},
+	"dependencies": {
+		"request" : "2.37.*",
+		"localStorage" : "1.0.*",
+		"markdown" : "0.5.*",
+		"tar" : "0.1.*",
+		"node-notifier": "3.0.*"
+	},
+	"maintainers": [
+		{
+			"name": "Corentin Hatte",
+			"email": "contact@corentin-hatte.eu",
+			"web": "http://corentin-hatte.eu/"
+		}
+	]
+}

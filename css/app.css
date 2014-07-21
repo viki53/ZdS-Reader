@@ -1,0 +1,127 @@
+html{
+	font-family: "Source Sans Pro", "Segoe UI", "Trebuchet MS", Helvetica, "Helvetica Neue", Arial, sans-serif;
+	font-size: 1em;
+	line-height: 1.5;
+	height: 100%;
+}
+
+body{
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	margin: 0;
+	height: 100%;
+	padding-top: calc(3em + 3px);
+	background: #f7f7f7;
+}
+@media all and (min-height: 35em) {
+	body{
+		padding-top: calc(3.75em + 3px);
+	}
+}
+h2{
+	font-size: 2.2em;
+	font-weight: normal;
+	margin: 0;
+	color: #084561;
+	border-bottom: 1px solid #f8ad32;
+}
+h3{
+	font-size: 1.4em;
+	font-weight: normal;
+	margin: 0;
+	color: #424242;
+}
+a{
+	color: inherit;
+}
+
+#topbar{
+	position: fixed;
+	top: 0;
+	right: 0;
+	left: 0;
+	background: #084561;
+	color: #fff;
+	border-bottom: 3px solid #f8ad32;
+}
+#topbar::after, #content::after{
+	content: '';
+	display: block;
+	clear: both;
+}
+
+#logo{
+	display: block;
+	float: left;
+	width: 12em;
+	height: 3em;
+	background: url(../img/logo@2x.png) center no-repeat;
+	background-size: contain;
+}
+@media all and (min-height: 35em) {
+	#logo{
+		width: 15em;
+		height: 3.75em;
+	}
+}
+#logo:hover, #logo:focus{
+	opacity: .7;
+}
+#logo>strong{
+	font: 0/0 a;
+	color: transparent;
+	text-shadow: none;
+}
+
+.page-content{
+	display: none;
+	max-height: 100%;
+	overflow-y: auto;
+}
+.current-page-home #home{
+	display: block;
+}
+
+#local-tuts, #distant-tuts{
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	padding: 1em 1em 0;
+}
+#local-tuts>h2, #distant-tuts>h2{
+
+}
+#local-tuts-list, #distant-tuts-list{
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+#local-tuts-list>li, #distant-tuts-list>li{
+	padding: .5em;
+	border-top: 1px solid #e0e4e5;
+}
+#local-tuts-list>li::after, #distant-tuts-list>li::after{
+	content: '';
+	display: block;
+	clear: both;
+}
+#local-tuts-list>li>.tutorial-img, #distant-tuts-list>li>.tutorial-img{
+	float: left;
+	margin-right: .5em;
+	width: 3.6em;
+	height: 3.6em;
+}
+#local-tuts-list>li>h3, #distant-tuts-list>li>h3{
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#local-tuts-list>li>.tutorial-tags, #distant-tuts-list>li>.tutorial-tags{
+	color: #f8ad32;
+}
+
+@media all and (min-width: 55em) {
+	#local-tuts, #distant-tuts{
+		float: left;
+		width: 50%;
+	}
+}
