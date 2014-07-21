@@ -4,6 +4,8 @@
 
 Le but de l'application est de permettre de consulter les tutoriels de [ZdS](http://zestedesavoir.com/) hors ligne tout en les maintenant à jour lorsque la connexion le permet.
 
+Notez que vous n'avez pas besoin d'avoir un compte ZdS pour utiliser l'appli.
+
 ## Lancer l'application
 
 ### Configuration nécessaire
