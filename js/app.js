@@ -67,14 +67,21 @@ app = {
 
 	tutorials: JSON.parse(localStorage.getItem('tutorials')) || [],
 
-	local_tutorials_ids: (localStorage.getItem('local_tutorials') || '').split(',').map(parseInt),
+	local_tutorials_ids: (localStorage.getItem('local_tutorials') || '').split(','),
 	local_tutorials: [],
 
-	distant_tutorials_ids: (localStorage.getItem('distant_tutorials') || '').split(',').map(parseInt),
+	distant_tutorials_ids: (localStorage.getItem('distant_tutorials') || '').split(','),
 	distant_tutorials: [],
 
 	init: function () {
 		for (var i=0, nb=app.local_tutorials_ids.length; i<nb; i++) {
+			if (app.local_tutorials_ids[i]) {
+				app.local_tutorials_ids[i] = parseInt(app.local_tutorials_ids[i]);
+			}
+			else {
+				app.local_tutorials_ids.splice(i, 1);
+			}
+
 			var tutorial = app.getTutorial(app.tutorials, { id : app.local_tutorials_ids[i] });
 
 			if (tutorial) {
@@ -84,9 +91,24 @@ app = {
 
 		app.writeTutorialsList(app.elems.local_tuts_list, app.local_tutorials);
 
+		if (!app.elems.local_tuts_list.firstChild) {
+			app.elems.local_tuts_empty = document.createElement('p');
+			app.elems.local_tuts_empty.className = 'alert-warning list-empty';
+			app.elems.local_tuts_empty.textContent = 'Vous n\'avez pas encore téléchargé de tutoriel.';
+
+			app.elems.local_tuts_list.parentNode.appendChild(app.elems.local_tuts_empty);
+		}
+
 		app.refreshLocalTutorials();
 
 		for (var i=0, nb=app.distant_tutorials_ids.length; i<nb; i++) {
+			if (app.distant_tutorials_ids[i]) {
+				app.distant_tutorials_ids[i] = parseInt(app.distant_tutorials_ids[i]);
+			}
+			else {
+				app.distant_tutorials_ids.splice(i, 1);
+			}
+
 			var tutorial = app.getTutorial(app.tutorials, { id : app.distant_tutorials_ids[i] });
 
 			if (tutorial) {
@@ -94,7 +116,18 @@ app = {
 			}
 		}
 
+		console.dir(app.distant_tutorials_ids);
+		console.dir(app.distant_tutorials);
+
 		app.writeTutorialsList(app.elems.distant_tuts_list, app.distant_tutorials);
+
+		if (!app.elems.distant_tuts_list.firstChild) {
+			app.elems.distant_tuts_empty = document.createElement('p');
+			app.elems.distant_tuts_empty.className = 'alert-error list-empty';
+			app.elems.distant_tuts_empty.textContent = 'Impossible de récupérer les tutoriels en ligne';
+
+			app.elems.distant_tuts_list.parentNode.appendChild(app.elems.distant_tuts_empty);
+		}
 
 		app.refreshDistantTutorials();
 
@@ -218,7 +251,7 @@ app = {
 				app.writeTutorialsListItem(li, tutorial);
 
 				(function(li, tutorial) {
-					fs.readFile(app.path + 'data/tutorials/' + files[i] + '/manifest.json', { encoding: 'UTF-8', flag: 'r' },	 function(err, manifest) {
+					fs.readFile(app.path + 'data/tutorialcs/' + files[i] + '/manifest.json', { encoding: 'UTF-8', flag: 'r' },	 function(err, manifest) {
 						if (err) {
 							console.error(err);
 							return;
@@ -269,13 +302,14 @@ app = {
 
 			var articles = doc.getElementById('content').querySelectorAll('.tutorial-list>article');
 
-			for (var i=0, nb=articles.length; i<nb; i++) {
+			for (var i=articles.length-1; i>=0; i--) {
 				var tut = { id: parseInt(articles[i].querySelector('a').getAttribute('href').replace(/\/tutoriels\/([\d]+)\/?(.*)/i, '$1')) };
 
 				var tutorial = app.getTutorial(app.distant_tutorials, tut);
 
 				if (!tutorial) {
 					tutorial = tut;
+					app.distant_tutorials_ids.unshift(tutorial.id);
 					app.distant_tutorials.unshift(tutorial);
 				}
 
@@ -287,6 +321,10 @@ app = {
 			}
 
 			app.writeTutorialsList(app.elems.distant_tuts_list, app.distant_tutorials);
+
+			if (app.elems.distant_tuts_list.firstChild && app.elems.distant_tuts_empty && app.elems.distant_tuts_empty.parentNode) {
+				app.elems.distant_tuts_empty.parentNode.removeChild(app.elems.distant_tuts_empty);
+			}
 
 			localStorage.setItem('distant_tutorials', app.distant_tutorials_ids.join(','));
 			localStorage.setItem('tutorials', JSON.stringify(app.tutorials));
