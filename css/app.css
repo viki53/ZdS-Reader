@@ -129,6 +129,15 @@ a{
 	display: block;
 	clear: both;
 }
+#local-tuts-list>li:hover, #distant-tuts-list>li:hover{
+	background-color: #fff;
+	cursor: pointer;
+}
+#local-tuts-list>li.loading, #distant-tuts-list>li.loading{
+	background-color: #dedede;
+	pointer-events: none;
+	cursor: progress;
+}
 #local-tuts-list>li>.tutorial-img, #distant-tuts-list>li>.tutorial-img{
 	float: left;
 	margin-right: .5em;

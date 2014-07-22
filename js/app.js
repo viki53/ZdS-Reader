@@ -88,14 +88,6 @@ app = {
 
 		app.writeTutorialsList(app.elems.distant_tuts_list, app.distant_tutorials, app.writeDistantTutorialsListItem, app.writeDistantTutorialsListEmpty);
 
-		if (!app.elems.distant_tuts_list.firstChild) {
-			app.elems.distant_tuts_empty = document.createElement('p');
-			app.elems.distant_tuts_empty.className = 'alert-error list-empty';
-			app.elems.distant_tuts_empty.textContent = 'Aucun tutoriel en ligne';
-
-			app.elems.distant_tuts_list.parentNode.appendChild(app.elems.distant_tuts_empty);
-		}
-
 		app.refreshDistantTutorials();
 	},
 
@@ -532,6 +524,10 @@ app = {
 				}
 			});
 		}, error_callback);
+
+		if (this && this.classList) {
+			this.classList.add('loading');
+		}
 	},
 
 	tutorialRetrieveSuccess: function(tutorial) {
@@ -551,6 +547,12 @@ app = {
 		app.addTutorial(tutorial, true);
 
 		app.writeTutorialsList(app.elems.local_tuts_list, app.local_tutorials, app.writeLocalTutorialsListItem, app.writeLocalTutorialsListEmpty);
+
+		var li = app.elems.distant_tuts_list.querySelector('li[data-tutorial-id="' + tutorial.id + '"]');
+		console.dir(li);
+		if (li && li.classList) {
+			li.classList.remove('loading');
+		}
 	},
 
 	tutorialRetrieveError: function(tutorial) {
