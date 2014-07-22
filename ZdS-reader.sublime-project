@@ -1,0 +1,24 @@
+{
+	"build_systems":
+	[
+		{
+			"name": "Launch with Node-WebKit",
+			"shell_cmd": "/Applications/node-webkit.app/Contents/MacOS/node-webkit ./"
+		},
+		{
+			"name": "Reset local data & launch",
+			"shell_cmd": "rm -R ./data/tutorials/* && /Applications/node-webkit.app/Contents/MacOS/node-webkit ./"
+		}
+	],
+	"folders":
+	[
+		{
+			"path": ".",
+			"follow_symlinks": true
+		}
+	],
+	"settings":
+	{
+		"tab_size": 4
+	}
+}
