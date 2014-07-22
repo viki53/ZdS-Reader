@@ -1,7 +1,9 @@
 
+var http = require('http');
 var request = require('request');
 var localStorage = require('localStorage')
 var fs = require('fs');
+var tar = require('tar');
 var gui = require('nw.gui');
 var Notification = require('node-notifier');
 
@@ -116,10 +118,6 @@ app = {
 			}
 		}
 
-		// console.dir(app.distant_tutorials_ids);
-		// console.dir(app.distant_tutorials);
-		// return;
-
 		app.writeTutorialsList(app.elems.distant_tuts_list, app.distant_tutorials);
 
 		if (!app.elems.distant_tuts_list.firstChild) {
@@ -128,6 +126,12 @@ app = {
 			app.elems.distant_tuts_empty.textContent = 'Aucun tutoriel en ligne';
 
 			app.elems.distant_tuts_list.parentNode.appendChild(app.elems.distant_tuts_empty);
+		}
+		else {
+			for (var i=0, nb=app.elems.distant_tuts_list.childNodes.length; i<nb; i++) {
+				var li = app.elems.distant_tuts_list.childNodes[i];
+				li.addEventListener('click', app.retrieveTutorial.bind(li, tutorial.id, app.tutorialRetrieveSuccess, app.tutorialRetrieveError), false);
+			}
 		}
 
 		app.refreshDistantTutorials();
@@ -267,7 +271,7 @@ app = {
 				app.writeTutorialsListItem(li, tutorial);
 
 				(function(li, tutorial) {
-					fs.readFile(app.path + 'data/tutorialcs/' + files[i] + '/manifest.json', { encoding: 'UTF-8', flag: 'r' },	 function(err, manifest) {
+					fs.readFile(app.path + 'data/tutorials/' + files[i] + '/manifest.json', { encoding: 'UTF-8', flag: 'r' },	 function(err, manifest) {
 						if (err) {
 							console.error(err);
 							return;
@@ -334,6 +338,12 @@ app = {
 
 			app.writeTutorialsList(app.elems.distant_tuts_list, app.distant_tutorials);
 
+			for (var i=0, nb=app.elems.distant_tuts_list.childNodes.length; i<nb; i++) {
+				var li = app.elems.distant_tuts_list.childNodes[i];
+
+				li.addEventListener('click', app.retrieveTutorial.bind(li, parseInt(li.dataset.tutorialId), app.tutorialRetrieveSuccess, app.tutorialRetrieveError), false);
+			}
+
 			if (app.elems.distant_tuts_list.firstChild && app.elems.distant_tuts_empty && app.elems.distant_tuts_empty.parentNode) {
 				app.elems.distant_tuts_empty.parentNode.removeChild(app.elems.distant_tuts_empty);
 			}
@@ -345,6 +355,64 @@ app = {
 				console.info('Tutoriels distants mis à jour');
 			}
 		});
+	},
+
+	downloadFile: function(url, dest, callback, error_callback) {
+		var file = fs.createWriteStream(dest);
+
+		http.get(url, function(response) {
+			response.pipe(file);
+
+			file.on('finish', function() {
+				file.close(callback);
+			});
+		}).on('error', function(err) {
+			fs.unlink(dest);
+			if (error_callback) error_callback(err);
+		});
+	},
+
+	retrieveTutorial: function(tutorial, callback, error_callback) {
+		// console.log(arguments);
+		// console.log(typeof tutorial);
+		// return;
+
+		var id = (typeof tutorial === 'number') ? tutorial : tutorial.id;
+
+		if (!id) {
+			return false;
+		}
+
+		var url = 'http://zestedesavoir.com/tutoriels/telecharger/?tutoriel=' + id;
+
+		var dest = app.path + 'data/tutorial-' + id + '.tar';
+
+		console.log('Récupération du tutoriel ' + id);
+
+		app.downloadFile(url, dest, function() {
+			fs.createReadStream(dest).pipe(tar.Extract({ path: app.path + 'data/tutorials/' + id + '/' })).on('error', function (err) {
+				if (error_callback) {
+					error_callback(err);
+				}
+			})
+			.on('end', function () {
+				fs.unlink(dest);
+
+				if (callback) {
+					callback(tutorial);
+				}
+			});
+		}, error_callback);
+	},
+
+	tutorialRetrieveSuccess: function(tutorial) {
+		console.info('Tutoriel téléchargé');
+
+		app.refreshLocalTutorials();
+	},
+
+	tutorialRetrieveError: function(tutorial) {
+		console.error('Erreur lors du téléchargement du tutoriel');
 	},
 
 	openDevTools: function() {
