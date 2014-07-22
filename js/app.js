@@ -67,58 +67,26 @@ app = {
 		distant_tuts_list: document.getElementById('distant-tuts-list')
 	},
 
-	tutorials: JSON.parse(localStorage.getItem('tutorials')) || [],
+	tutorials: [],
 
-	local_tutorials_ids: (localStorage.getItem('local_tutorials') || '').split(','),
+	local_tutorials_ids: [],
 	local_tutorials: [],
 
-	distant_tutorials_ids: (localStorage.getItem('distant_tutorials') || '').split(','),
+	distant_tutorials_ids: [],
 	distant_tutorials: [],
 
 	init: function () {
-		for (var i=0, nb=app.local_tutorials_ids.length; i<nb; i++) {
-			if (app.local_tutorials_ids[i]) {
-				app.local_tutorials_ids[i] = parseInt(app.local_tutorials_ids[i]);
-			}
-			else {
-				app.local_tutorials_ids.splice(i, 1);
-			}
+		app.retrieveTutorialsFromStorage();
 
-			var tutorial = app.getTutorial({ id : app.local_tutorials_ids[i] });
+		/* Tutoriels locaux */
 
-			if (tutorial) {
-				app.local_tutorials.push(tutorial);
-			}
-		}
-
-		app.writeTutorialsList(app.elems.local_tuts_list, app.local_tutorials);
-
-		if (!app.elems.local_tuts_list.firstChild) {
-			app.elems.local_tuts_empty = document.createElement('p');
-			app.elems.local_tuts_empty.className = 'alert-warning list-empty';
-			app.elems.local_tuts_empty.textContent = 'Aucun tutoriel local';
-
-			app.elems.local_tuts_list.parentNode.appendChild(app.elems.local_tuts_empty);
-		}
+		app.writeTutorialsList(app.elems.local_tuts_list, app.local_tutorials, app.writeLocalTutorialsListItem, app.writeLocalTutorialsListEmpty);
 
 		app.refreshLocalTutorials();
 
-		for (var i=0, nb=app.distant_tutorials_ids.length; i<nb; i++) {
-			if (app.distant_tutorials_ids[i]) {
-				app.distant_tutorials_ids[i] = parseInt(app.distant_tutorials_ids[i]);
-			}
-			else {
-				app.distant_tutorials_ids.splice(i, 1);
-			}
+		/* Tutoriels distants */
 
-			var tutorial = app.getTutorial({ id : app.distant_tutorials_ids[i] });
-
-			if (tutorial) {
-				app.distant_tutorials.push(tutorial);
-			}
-		}
-
-		app.writeTutorialsList(app.elems.distant_tuts_list, app.distant_tutorials);
+		app.writeTutorialsList(app.elems.distant_tuts_list, app.distant_tutorials, app.writeDistantTutorialsListItem, app.writeDistantTutorialsListEmpty);
 
 		if (!app.elems.distant_tuts_list.firstChild) {
 			app.elems.distant_tuts_empty = document.createElement('p');
@@ -127,23 +95,12 @@ app = {
 
 			app.elems.distant_tuts_list.parentNode.appendChild(app.elems.distant_tuts_empty);
 		}
-		else {
-			for (var i=0, nb=app.elems.distant_tuts_list.childNodes.length; i<nb; i++) {
-				var li = app.elems.distant_tuts_list.childNodes[i];
-				li.addEventListener('click', app.retrieveTutorial.bind(li, tutorial.id, app.tutorialRetrieveSuccess, app.tutorialRetrieveError), false);
-			}
-		}
 
 		app.refreshDistantTutorials();
+	},
 
-
-		// app.tray = new gui.Tray({ icon: 'img/icon-18x18.png' });
-		// app.tray.title = '';
-		// app.tray.tooltip = app.title;
-
-		// var menu = new gui.Menu();
-		// menu.append(new gui.MenuItem({ type: 'checkbox', label: 'box1' }));
-		// app.tray.menu = menu;
+	openDevTools: function() {
+		app.window.showDevTools();
 	},
 
 	notify: function(opt) {
@@ -160,9 +117,131 @@ app = {
 		app.notifier.notify(opt);
 	},
 
-	writeTutorialsList: function (ul, tutorials) {
+	getTutorial: function (search) {
+		loop_1:
+		for (var i=0, nb=app.tutorials.length; i<nb; i++) {
+			var match = true;
+			for (var key in search) {
+				if (app.tutorials[i][key] && app.tutorials[i][key] !== search[key]) {
+					match = false;
+					continue loop_1;
+				}
+			}
+			if (match) {
+				return app.tutorials[i];
+			}
+		}
+		return null;
+	},
+
+	addTutorial: function (tutorial, is_local) {
+		app.tutorials.unshift(tutorial);
+
+		if (!is_local) {
+			app.distant_tutorials.unshift(tutorial);
+			app.distant_tutorials_ids.unshift(tutorial.id);
+		}
+		else {
+			app.local_tutorials.unshift(tutorial);
+			app.local_tutorials_ids.unshift(tutorial.id);
+		}
+
+		return tutorial;
+	},
+
+	deleteTutorial: function (tutorial) {
+		if (typeof tutorial === 'number') {
+			tutorial = app.getTutorial({ id: tutorial });
+		}
+
+		if(!tutorial) {
+			return false;
+		}
+
+		var index = app.tutorials.indexOf(tutorial);
+
+		if (index > -1) {
+			var index_local = app.local_tutorials.indexOf(tutorial);
+			if (index_local > -1) {
+				app.tutorial.splice(index_local, 1);
+			}
+			var index_local_id = app.local_tutorials_ids.indexOf(tutorial.id);
+			if (index_local_id > -1) {
+				app.tutorial.splice(index_local_id, 1);
+			}
+
+			var index_distant = app.distant_tutorials.indexOf(tutorial);
+			if (index_distant > -1) {
+				app.tutorial.splice(index_distant, 1);
+			}
+			var index_distant_id = app.distant_tutorials_ids.indexOf(tutorial.id);
+			if (index_distant_id > -1) {
+				app.tutorial.splice(index_distant_id, 1);
+			}
+
+			app.tutorial.splice(index, 1);
+		}
+	},
+
+	saveTutorials: function (only) {
+		localStorage.setItem('tutorials', JSON.stringify(app.tutorials));
+
+		if (!only || only === 'local') {
+			localStorage.setItem('local_tutorials', app.local_tutorials_ids.join(','));
+		}
+		if (!only || only === 'distant') {
+			localStorage.setItem('distant_tutorials', app.distant_tutorials_ids.join(','));
+		}
+	},
+
+	retrieveTutorialsFromStorage: function (only) {
+		app.tutorials = JSON.parse(localStorage.getItem('tutorials')) || [];
+
+		app.local_tutorials_ids = (localStorage.getItem('local_tutorials') || '').split(',');
+
+		for (var i=0, nb=app.local_tutorials_ids.length; i<nb; i++) {
+			if (app.local_tutorials_ids[i]) {
+				app.local_tutorials_ids[i] = parseInt(app.local_tutorials_ids[i]);
+			}
+			else {
+				app.local_tutorials_ids.splice(i, 1);
+			}
+
+			var tutorial = app.getTutorial({ id : app.local_tutorials_ids[i] });
+
+			if (tutorial) {
+				app.local_tutorials.push(tutorial);
+			}
+		}
+
+		app.distant_tutorials_ids = (localStorage.getItem('distant_tutorials') || '').split(',');
+
+		for (var i=0, nb=app.distant_tutorials_ids.length; i<nb; i++) {
+			if (app.distant_tutorials_ids[i]) {
+				app.distant_tutorials_ids[i] = parseInt(app.distant_tutorials_ids[i]);
+			}
+			else {
+				app.distant_tutorials_ids.splice(i, 1);
+			}
+
+			var tutorial = app.getTutorial({ id : app.distant_tutorials_ids[i] });
+
+			if (tutorial) {
+				app.distant_tutorials.push(tutorial);
+			}
+		}
+	},
+
+	writeTutorialsList: function (ul, tutorials, li_callback, empty_callback) {
 		while (ul.firstChild) {
 			ul.removeChild(ul.firstChild);
+		}
+
+		if (!tutorials.length) {
+			if (empty_callback) {
+				empty_callback();
+			}
+			return false;
 		}
 
 		var fragment = document.createDocumentFragment();
@@ -175,6 +254,10 @@ app = {
 			if (!li.firstChild) {
 				delete li;
 				return;
+			}
+
+			if (li_callback) {
+				li_callback(li, tutorials[i]);
 			}
 
 			fragment.appendChild(li);
@@ -224,24 +307,50 @@ app = {
 
 			li.firstChild ? li.insertBefore(thumbnail, li.firstChild) : li.appendChild(thumbnail);
 		}
-		// http://zestedesavoir.com/tutoriels/telecharger/?tutoriel=229
 	},
 
-	getTutorial: function (search) {
-		loop_1:
-		for (var i=0, nb=app.tutorials.length; i<nb; i++) {
-			var match = true;
-			for (var key in search) {
-				if (app.tutorials[i][key] && app.tutorials[i][key] !== search[key]) {
-					match = false;
-					continue loop_1;
+	writeLocalTutorialsListItem: function(li, tutorial) {
+		
+	},
+
+	writeDistantTutorialsListItem: function(li, tutorial) {
+		li.addEventListener('click', app.retrieveTutorial.bind(li, tutorial.id, app.tutorialRetrieveSuccess, app.tutorialRetrieveError), false);
+	},
+
+	writeLocalTutorialsListEmpty: function() {
+		if (!app.elems.local_tuts_list.firstChild) {
+			app.elems.local_tuts_empty = document.createElement('p');
+			app.elems.local_tuts_empty.className = 'alert-warning list-empty';
+			app.elems.local_tuts_empty.textContent = 'Aucun tutoriel local';
+
+			app.elems.local_tuts_list.parentNode.appendChild(app.elems.local_tuts_empty);
+		}
+		else {
+			if (app.elems.local_tuts_empty) {
+				if (app.elems.local_tuts_empty.parentNode) {
+					app.elems.local_tuts_empty.parentNode.removeChild(app.elems.local_tuts_empty);
 				}
-			}
-			if (match) {
-				return app.tutorials[i];
+				delete app.elems.local_tuts_empty;
 			}
 		}
-		return null;
+	},
+
+	writeDistantTutorialsListEmpty: function() {
+		if (!app.elems.distant_tuts_list.firstChild) {
+			app.elems.distant_tuts_empty = document.createElement('p');
+			app.elems.distant_tuts_empty.className = 'alert-warning list-empty';
+			app.elems.distant_tuts_empty.textContent = 'Aucun tutoriel distant';
+
+			app.elems.distant_tuts_list.parentNode.appendChild(app.elems.distant_tuts_empty);
+		}
+		else {
+			if (app.elems.distant_tuts_empty) {
+				if (app.elems.distant_tuts_empty.parentNode) {
+					app.elems.distant_tuts_empty.parentNode.removeChild(app.elems.distant_tuts_empty);
+				}
+				delete app.elems.distant_tuts_empty;
+			}
+		}
 	},
 
 	refreshLocalTutorials: function () {
@@ -256,6 +365,12 @@ app = {
 			}
 
 			for (var i=0, nb=files.length; i<nb; i++) {
+				var file_stats = fs.statSync(app.path + 'data/tutorials/' + files[i]);
+
+				if (!file_stats.isDirectory()) {
+					continue;
+				}
+
 				var li = document.createElement('li');
 
 				var tut = { id: parseInt(files[i]) };
@@ -287,20 +402,18 @@ app = {
 
 						app.writeTutorialsListItem(li, tutorial);
 
-						localStorage.setItem('tutorials', JSON.stringify(app.tutorials));
+						app.writeLocalTutorialsListEmpty();
+
+						app.saveTutorials('none');
 					});
 				})(li, tutorial);
 
 				app.elems.local_tuts_list.appendChild(li);
-				
-				if (app.elems.local_tuts_empty && app.elems.local_tuts_empty.parentNode) {
-					app.elems.local_tuts_empty.parentNode.removeChild(app.elems.local_tuts_empty);
-					delete app.elems.local_tuts_empty;
-				}
+
+				app.writeLocalTutorialsListEmpty();
 			}
 
-			localStorage.setItem('local_tutorials', app.local_tutorials_ids.join(','));
-			localStorage.setItem('tutorials', JSON.stringify(app.tutorials));
+			app.saveTutorials('local');
 
 			if (app.debug) {
 				console.info('Tutoriels locaux mis à jour');
@@ -323,43 +436,40 @@ app = {
 			var articles = doc.getElementById('content').querySelectorAll('.tutorial-list>article');
 
 			for (var i=articles.length-1; i>=0; i--) {
-				var tut = { id: parseInt(articles[i].querySelector('a').getAttribute('href').trim().replace(/\/tutoriels\/([\d]+)\/?(.*)/i, '$1')) };
 
-				var tutorial = app.getTutorial(tut);
-
-				if (!tutorial) {
-					tutorial = tut;
-					app.distant_tutorials_ids.unshift(tutorial.id);
-					app.distant_tutorials.unshift(tutorial);
-					app.tutorials.unshift(tutorial);
-				}
-
-				tutorial.title = articles[i].querySelector('h3').textContent;
-				tutorial.url = articles[i].querySelector('a').getAttribute('href').trim();
-				tutorial.thumbnail = articles[i].querySelector('img.tutorial-img').getAttribute('src').replace(/^\/(.*)$/i, app.api_url + '$1');
-				tutorial.image = tutorial.thumbnail.replace(/(.60x60_q85_crop.)(png|jpg|gif)$/i, '');
-				tutorial.tags = articles[i].querySelector('.article-metadata').textContent.trim().split('\n').map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; });
+				var tutorial = app.parseDistantTutorial(articles[i]);
 			}
 
-			app.writeTutorialsList(app.elems.distant_tuts_list, app.distant_tutorials);
-
-			for (var i=0, nb=app.elems.distant_tuts_list.childNodes.length; i<nb; i++) {
-				var li = app.elems.distant_tuts_list.childNodes[i];
-
-				li.addEventListener('click', app.retrieveTutorial.bind(li, parseInt(li.dataset.tutorialId), app.tutorialRetrieveSuccess, app.tutorialRetrieveError), false);
-			}
+			app.writeTutorialsList(app.elems.distant_tuts_list, app.distant_tutorials, app.writeDistantTutorialsListItem, app.writeDistantTutorialsListEmpty);
 
 			if (app.elems.distant_tuts_list.firstChild && app.elems.distant_tuts_empty && app.elems.distant_tuts_empty.parentNode) {
 				app.elems.distant_tuts_empty.parentNode.removeChild(app.elems.distant_tuts_empty);
 			}
 
-			localStorage.setItem('distant_tutorials', app.distant_tutorials_ids.join(','));
-			localStorage.setItem('tutorials', JSON.stringify(app.tutorials));
+			app.saveTutorials('distant');
 
 			if (app.debug) {
 				console.info('Tutoriels distants mis à jour');
 			}
 		});
+	},
+
+	parseDistantTutorial: function(article) {
+		var tut = { id: parseInt(article.querySelector('a').getAttribute('href').trim().replace(/\/tutoriels\/([\d]+)\/?(.*)/i, '$1')) };
+
+		var tutorial = app.getTutorial(tut);
+
+		if (!tutorial) {
+			tutorial = app.addTutorial(tut);
+		}
+
+		tutorial.title = article.querySelector('h3').textContent;
+		tutorial.url = article.querySelector('a').getAttribute('href').trim();
+		tutorial.thumbnail = article.querySelector('img.tutorial-img').getAttribute('src').replace(/^\/(.*)$/i, app.api_url + '$1');
+		tutorial.image = tutorial.thumbnail.replace(/(.60x60_q85_crop.)(png|jpg|gif)$/i, '');
+		tutorial.tags = article.querySelector('.article-metadata').textContent.trim().split('\n').map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; });
+
+		return tutorial;
 	},
 
 	downloadFile: function(url, dest, callback, error_callback) {
@@ -378,10 +488,6 @@ app = {
 	},
 
 	retrieveTutorial: function(tutorial, callback, error_callback) {
-		// console.log(arguments);
-		// console.log(typeof tutorial);
-		// return;
-
 		var id = (typeof tutorial === 'number') ? tutorial : tutorial.id;
 
 		if (!id) {
@@ -401,7 +507,12 @@ app = {
 				}
 			})
 			.on('end', function () {
-				fs.unlink(dest);
+				try{
+					fs.unlinkSync(dest);
+				}
+				catch(err) {
+					console.error(err);
+				}
 
 				if (callback) {
 					callback(tutorial);
@@ -415,18 +526,22 @@ app = {
 
 		app.refreshLocalTutorials();
 
-		if (app.elems.local_tuts_empty && app.elems.local_tuts_empty.parentNode) {
-			app.elems.local_tuts_empty.parentNode.removeChild(app.elems.local_tuts_empty);
-			delete app.elems.local_tuts_empty;
+		console.dir();
+
+		if (typeof tutorial !== 'object') {
+			tutorial = app.getTutorial({ id: tutorial });
 		}
+		if (!tutorial) {
+			return false;
+		}
+
+		app.addTutorial(tutorial, true);
+
+		app.writeTutorialsList(app.elems.local_tuts_list, app.local_tutorials, app.writeLocalTutorialsListItem, app.writeLocalTutorialsListEmpty);
 	},
 
 	tutorialRetrieveError: function(tutorial) {
 		console.error('Erreur lors du téléchargement du tutoriel');
-	},
-
-	openDevTools: function() {
-		app.window.showDevTools();
 	}
 }
 
