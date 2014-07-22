@@ -292,6 +292,11 @@ app = {
 				})(li, tutorial);
 
 				app.elems.local_tuts_list.appendChild(li);
+				
+				if (app.elems.local_tuts_empty && app.elems.local_tuts_empty.parentNode) {
+					app.elems.local_tuts_empty.parentNode.removeChild(app.elems.local_tuts_empty);
+					delete app.elems.local_tuts_empty;
+				}
 			}
 
 			localStorage.setItem('local_tutorials', app.local_tutorials_ids.join(','));
@@ -409,6 +414,11 @@ app = {
 		console.info('Tutoriel téléchargé');
 
 		app.refreshLocalTutorials();
+
+		if (app.elems.local_tuts_empty && app.elems.local_tuts_empty.parentNode) {
+			app.elems.local_tuts_empty.parentNode.removeChild(app.elems.local_tuts_empty);
+			delete app.elems.local_tuts_empty;
+		}
 	},
 
 	tutorialRetrieveError: function(tutorial) {
