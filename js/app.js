@@ -275,10 +275,14 @@ app = {
 			li.dataset.tutorialId = tutorial.id;
 		}
 		if (tutorial.title) {
-			var title = li.querySelector('h3') || document.createElement('h3');
-			title.textContent = tutorial.title;
+			var title = li.querySelector('h3');
 
-			li.firstChild ? li.insertBefore(title, li.firstChild) : li.appendChild(title);
+			if (!title) {
+				title = document.createElement('h3');
+
+				li.firstChild ? li.insertBefore(title, li.firstChild) : li.appendChild(title);
+			}
+			title.textContent = tutorial.title;
 		}
 		if (tutorial.description) {
 			li.title = tutorial.description;
@@ -289,23 +293,32 @@ app = {
 		if (tutorial.tags) {
 			li.dataset.tutorialTags = tutorial.tags.join(',');
 
-			var tags = li.querySelector('aside') || document.createElement('aside');
-			tags.className = 'tutorial-tags';
-			tags.textContent = tutorial.tags.join(', ');
+			var tags = li.querySelector('aside.tutorial-tags');
 
-			li.appendChild(tags);
+			if (!tags) {
+				tags = document.createElement('aside');
+				tags.className = 'tutorial-tags';
+
+				li.appendChild(tags);
+			}
+
+			tags.textContent = tutorial.tags.join(', ');
 		}
 		if (tutorial.license) {
 			li.dataset.tutorialLicense = tutorial.license;
 		}
 
 		if (tutorial.thumbnail) {
-			var thumbnail = li.querySelector('img') || document.createElement('img');
-			thumbnail.className = 'tutorial-img';
-			thumbnail.src = tutorial.thumbnail;
-			thumbnail.alt = '';
+			var thumbnail = li.querySelector('img.tutorial-img');
 
-			li.firstChild ? li.insertBefore(thumbnail, li.firstChild) : li.appendChild(thumbnail);
+			if(!thumbnail) {
+				thumbnail = document.createElement('img');
+				thumbnail.className = 'tutorial-img';
+				thumbnail.alt = '';
+
+				li.firstChild ? li.insertBefore(thumbnail, li.firstChild) : li.appendChild(thumbnail);
+			}
+			thumbnail.src = tutorial.thumbnail;
 		}
 	},
 
@@ -394,11 +407,11 @@ app = {
 
 						manifest = JSON.parse(manifest);
 
-						tutorial.title = manifest.title;
-						tutorial.description = manifest.description || "";
-						tutorial.type = manifest.type || "N/A";
-						tutorial.license = manifest.license || "N/A";
-						tutorial.tags = manifest.tags || [];
+						tutorial.title = manifest.title || tutorial.title;
+						tutorial.description = manifest.description || tutorial.description || "";
+						tutorial.type = manifest.type || tutorial.type || "N/A";
+						tutorial.license = manifest.license || tutorial.license || "N/A";
+						tutorial.tags = manifest.tags || tutorial.tags || [];
 
 						app.writeTutorialsListItem(li, tutorial);
 
@@ -463,11 +476,11 @@ app = {
 			tutorial = app.addTutorial(tut);
 		}
 
-		tutorial.title = article.querySelector('h3').textContent;
-		tutorial.url = article.querySelector('a').getAttribute('href').trim();
-		tutorial.thumbnail = article.querySelector('img.tutorial-img').getAttribute('src').replace(/^\/(.*)$/i, app.api_url + '$1');
-		tutorial.image = tutorial.thumbnail.replace(/(.60x60_q85_crop.)(png|jpg|gif)$/i, '');
-		tutorial.tags = article.querySelector('.article-metadata').textContent.trim().split('\n').map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; });
+		tutorial.title = article.querySelector('h3').textContent || tutorial.title || "";
+		tutorial.url = article.querySelector('a').getAttribute('href').trim() || tutorial.url || "";
+		tutorial.thumbnail = article.querySelector('img.tutorial-img').getAttribute('src').replace(/^\/(.*)$/i, app.api_url + '$1') || tutorial.thumbnail || "";
+		tutorial.image = tutorial.thumbnail.replace(/(.60x60_q85_crop.)(png|jpg|gif)$/i, '') || tutorial.image || "";
+		tutorial.tags = article.querySelector('.article-metadata').textContent.trim().split('\n').map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; }) || tutorial.tags || "";
 
 		return tutorial;
 	},
