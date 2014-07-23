@@ -3,6 +3,7 @@ var http = require('http');
 var request = require('request');
 var localStorage = require('localStorage')
 var fs = require('fs');
+var markdown = require('markdown').markdown;
 var tar = require('tar');
 var gui = require('nw.gui');
 var Notification = require('node-notifier');
@@ -83,7 +84,13 @@ app = {
 	distant_tutorials_ids: [],
 	distant_tutorials: [],
 
+	loaded: false,
+
 	init: function () {
+		if (app.loaded) {
+			return false;
+		}
+
 		app.elems.logo.addEventListener('click', app.showHome, false);
 
 		app.retrieveTutorialsFromStorage();
@@ -570,7 +577,11 @@ app = {
 		console.error('Erreur lors du téléchargement du tutoriel');
 	},
 
-	showHome: function() {
+	showHome: function(event) {
+		if (event && event.preventDefault) {
+			event.preventDefault();
+		}
+
 		document.body.classList.remove('current-page-tutorial');
 		document.body.classList.add('current-page-home');
 
@@ -579,13 +590,304 @@ app = {
 	},
 
 	showTutorial: function(tutorial) {
-		console.dir(tutorial);
-
 		document.body.classList.remove('current-page-home');
 		document.body.classList.add('current-page-tutorial');
 
+		(function(tutorial) {
+			fs.readFile(app.path + 'data/tutorials/' + tutorial.id + '/manifest.json', { encoding: 'UTF-8', flag: 'r' },	 function(err, manifest) {
+				if (err) {
+					console.error(err);
+					return;
+				}
+
+				manifest = JSON.parse(manifest);
+
+				tutorial.title = manifest.title || tutorial.title;
+				tutorial.description = manifest.description || tutorial.description || '';
+				tutorial.type = manifest.type || tutorial.type || 'N/A';
+				tutorial.license = manifest.license || tutorial.license || 'N/A';
+				tutorial.tags = manifest.tags || tutorial.tags || [];
+
+				app.writeTutorialPage(tutorial, manifest);
+
+				app.saveTutorials('none');
+			});
+		})(tutorial);
+
+		app.writeTutorialPage(tutorial);
+	},
+
+	fixTutorialMarkdown: function(str) {
+		return str.replace(/src=\"\/([^"]+)\"/gi, 'src="' + app.api_url + '$1"');
+	},
+
+	writeTutorialPage: function(tutorial, manifest) {
+		if (app.debug) {
+			console.info('Page tutoriel ' + tutorial.id);
+		}
+
 		app.elems.tutorial_title.textContent = tutorial.title;
 		app.elems.tutorial_description.textContent = tutorial.description || '';
+
+		if (manifest) {
+			if (manifest.introduction) {
+				app.loadTutorialFragment(tutorial, manifest.introduction, function (content) {
+					tutorial_content.introduction = app.fixTutorialMarkdown(markdown.toHTML(content));
+
+					app.writeTutorialContent(tutorial_content);
+				});
+			}
+
+			if (manifest.parts) {
+				var tutorial_content = {
+					title: tutorial.title,
+					description: tutorial.description,
+					introduction: '',
+					parts: [],
+					conclusion: ''
+				};
+
+				for (var i=0, nb=manifest.parts.length; i<nb; i++) {
+					tutorial_content.parts[i] = {
+						title: manifest.parts[i].title,
+						introduction: '',
+						chapters: [],
+						conclusion: ''
+					};
+					app.loadTutorialPart(tutorial, manifest.parts[i], tutorial_content.parts[i], function() {
+						app.writeTutorialContent(tutorial_content);
+					});
+				}
+			}
+			else if (manifest.chapters) {
+				var tutorial_content = {
+					title: tutorial.title,
+					description: tutorial.description,
+					introduction: '',
+					chapters: [],
+					conclusion: ''
+				};
+
+				for (var i=0, nb=manifest.chapters.length; i<nb; i++) {
+					tutorial_content.chapters[i] = {
+						title: manifest.chapters[i].title,
+						introduction: '',
+						extracts: [],
+						conclusion: ''
+					};
+					app.loadTutorialChapter(tutorial, manifest.chapters[i], tutorial_content.chapters[i], function() {
+						app.writeTutorialContent(tutorial_content);
+					});
+				}
+			}
+			else if (manifest.chapter && manifest.chapter.extracts) {
+				var tutorial_content = {
+					title: tutorial.title,
+					description: tutorial.description,
+					introduction: '',
+					chapter: {
+						extracts: [],
+					},
+					conclusion: ''
+				};
+
+				for (var i=0, nb=manifest.chapter.extracts.length; i<nb; i++) {
+					tutorial_content.chapter.extracts[i] = {
+						title: manifest.chapter.extracts[i].title,
+						content: ''
+					};
+
+					app.loadTutorialExtract(tutorial, manifest.chapter.extracts[i], tutorial_content.chapter.extracts[i], function() {
+						app.writeTutorialContent(tutorial_content);
+					});
+				}
+			}
+
+			if (manifest.conclusion) {
+				app.loadTutorialFragment(tutorial, manifest.conclusion, function (content) {
+					tutorial_content.conclusion = app.fixTutorialMarkdown(markdown.toHTML(content));
+
+					app.writeTutorialContent(tutorial_content);
+				});
+			}
+		}
+	},
+
+	writeTutorialContent: function(tutorial_content) {
+		if (app.debug) {
+			console.info('Écriture tutoriel = "' + tutorial_content.title + '"');
+		}
+
+		while (app.elems.tutorial_content.firstChild) {
+			app.elems.tutorial_content.removeChild(app.elems.tutorial_content.firstChild);
+		}
+
+		var tut_introduction = document.createElement('header');
+		tut_introduction.className = 'tutorial-introduction';
+		tut_introduction.innerHTML = tutorial_content.introduction;
+		app.elems.tutorial_content.appendChild(tut_introduction);
+
+		if (tutorial_content.parts) {
+			for (var i=0, nb=tutorial_content.parts.length; i<nb; i++) {
+				var tut_part = app.writeTutorialPart(tutorial_content.parts[i]);
+				app.elems.tutorial_content.appendChild(tut_part);
+			}
+		}
+		else if (tutorial_content.chapters) {
+			for (var i=0, nb=tutorial_content.chapters.length; i<nb; i++) {
+				var tut_chapter = app.writeTutorialChapter(tutorial_content.chapters[i]);
+				app.elems.tutorial_content.appendChild(tut_chapter);
+			}
+		}
+		else if (tutorial_content.chapter && tutorial_content.chapter.extracts) {
+			for (var i=0, nb=tutorial_content.chapter.extracts.length; i<nb; i++) {
+				var tut_extract = app.writeTutorialExtract(tutorial_content.chapter.extracts[i]);
+				app.elems.tutorial_content.appendChild(tut_extract);
+			}
+		}
+
+		var tut_conclusion = document.createElement('footer');
+		tut_introduction.className = 'tutorial-conclusion';
+		tut_conclusion.innerHTML = tutorial_content.conclusion;
+		app.elems.tutorial_content.appendChild(tut_conclusion);
+	},
+
+	writeTutorialPart: function (part) {
+		var tut_part = document.createElement('article');
+		tut_part.className = 'tutorial-part';
+
+		var tut_part_introduction = document.createElement('header');
+		tut_part_introduction.className = 'tutorial-part-introduction';
+		tut_part_introduction.innerHTML = part.introduction;
+		tut_part.appendChild(tut_part_introduction);
+
+		for (var i=0, nb=part.chapters.length; i<nb; i++) {
+			var tut_chapter = app.writeTutorialChapter(part.chapters[i], true);
+			tut_part.appendChild(tut_chapter);
+		}
+
+		var tut_part_conclusion = document.createElement('footer');
+		tut_part_conclusion.className = 'tutorial-part-conclusion';
+		tut_part_conclusion.innerHTML = part.conclusion;
+		tut_part.appendChild(tut_part_conclusion);
+
+		return tut_part;
+	},
+
+	writeTutorialChapter: function (chapter, within_part) {
+		var tut_chapter = document.createElement(within_part ? 'section' : 'article');
+		tut_chapter.className = 'tutorial-chapter';
+
+		var tut_chapter_introduction = document.createElement('header');
+		tut_chapter_introduction.className = 'tutorial-chapter-introduction';
+		tut_chapter_introduction.innerHTML = chapter.introduction;
+		tut_chapter.appendChild(tut_chapter_introduction);
+
+		for (var i=0, nb=chapter.extracts.length; i<nb; i++) {
+			var tut_extract = app.writeTutorialExtract(chapter.extracts[i]);
+			tut_chapter.appendChild(tut_extract);
+		}
+
+		var tut_chapter_conclusion = document.createElement('footer');
+		tut_chapter_conclusion.className = 'tutorial-chapter-conclusion';
+		tut_chapter_conclusion.innerHTML = chapter.conclusion;
+		tut_chapter.appendChild(tut_chapter_conclusion);
+
+		return tut_chapter;
+	},
+
+	writeTutorialExtract: function (extract, within_part) {
+		var tut_extract = document.createElement('section');
+		tut_extract.className = 'tutorial-extract';
+		tut_extract.innerHTML = extract.content;
+
+		return tut_extract;
+	},
+
+	loadTutorialFragment: function(tutorial, fragment, callback) {
+		fs.readFile(app.path + 'data/tutorials/' + tutorial.id + '/' + fragment, { encoding: 'UTF-8', flag: 'r' },	 function(err, content) {
+			if (err) {
+				console.error(err);
+				return;
+			}
+
+			callback(content);
+		});
+	},
+
+	loadTutorialPart: function(tutorial, part, part_content, part_callback) {
+		if (app.debug) {
+			console.info('Chargement partie ' + part.pk);
+		}
+
+		if (part.introduction) {
+			app.loadTutorialFragment(tutorial, part.introduction, function(content) {
+				part_content.introduction = app.fixTutorialMarkdown(markdown.toHTML(content));
+
+				part_callback();
+			});
+		}
+
+		for (var i=0, nb=part.chapters.length; i<nb; i++) {
+			part_content.chapters[i] = {
+				title: part.chapters[i].title,
+				introduction: '',
+				extracts: [],
+				conclusion: ''
+			};
+
+			app.loadTutorialChapter(tutorial, part.chapters[i], part_content.chapters[i], part_callback);
+		}
+
+		if (part.conclusion) {
+			app.loadTutorialFragment(tutorial, part.conclusion, function(content) {
+				part_content.conclusion = app.fixTutorialMarkdown(markdown.toHTML(content));
+
+				part_callback();
+			});
+		}
+	},
+
+	loadTutorialChapter: function(tutorial, chapter, chapter_content, chapter_callback) {
+		if (app.debug) {
+			console.info('Chargement chapitre ' + chapter.pk);
+		}
+
+		if (chapter.introduction) {
+			app.loadTutorialFragment(tutorial, chapter.introduction, function(content) {
+				chapter_content.introduction = app.fixTutorialMarkdown(markdown.toHTML(content));
+
+				chapter_callback();
+			});
+		}
+
+		for (var i=0, nb=chapter.extracts.length; i<nb; i++) {
+			chapter_content.extracts[i] = {
+				title: chapter.extracts[i].title,
+				content: ''
+			};
+			app.loadTutorialExtract(tutorial, chapter.extracts[i], chapter_content.extracts[i], chapter_callback);
+		}
+
+		if (chapter.conclusion) {
+			app.loadTutorialFragment(tutorial, chapter.conclusion, function(content) {
+				chapter_content.conclusion = app.fixTutorialMarkdown(markdown.toHTML(content));
+
+				chapter_callback();
+			});
+		}
+	},
+
+	loadTutorialExtract: function(tutorial, extract, extract_content, extract_callback) {
+		if (app.debug) {
+			console.info('Chargement extrait ' + extract.pk);
+		}
+
+		app.loadTutorialFragment(tutorial, extract.text, function(content) {
+			extract_content.content = app.fixTutorialMarkdown(markdown.toHTML(content));
+
+			extract_callback();
+		});
 	}
 }
 

@@ -68,6 +68,7 @@ a{
 	top: 0;
 	right: 0;
 	left: 0;
+	z-index: 5;
 	background: #084561;
 	color: #fff;
 	border-bottom: 3px solid #f8ad32;
@@ -107,7 +108,10 @@ a{
 	right: 0;
 	bottom: 0;
 	left: 0;
+	z-index: 0;
 	overflow-y: auto;
+	-webkit-transform: translateY(-100%);
+	transform: translateY(-100%);
 	-webkit-transition: all 200ms ease-in-out;
 	transition: all 200ms ease-in-out;
 }
@@ -122,11 +126,10 @@ a{
 
 /* Home */
 .current-page-home #home{
+	-webkit-transform: none;
 	transform: none;
-}
-body:not(.current-page-home) #home{
-	-webkit-transform: translateX(-100%);
-	transform: translateX(-100%);
+	-webkit-transition-delay: 200ms;
+	transition-delay: 200ms;
 }
 #home>header{
 	font: 0/0 a;
@@ -191,14 +194,27 @@ body:not(.current-page-home) #home{
 
 /* Tutoriel */
 
-body:not(.current-page-tutorial) #tutorial{
-	-webkit-transform: translateX(100%);
-	transform: translateX(100%);
+.current-page-tutorial #tutorial{
+	-webkit-transform: none;
+	transform: none;
+	-webkit-transition-delay: 200ms;
+	transition-delay: 200ms;
 }
 
 #tutorial>header{
-	padding: .5em;
+	padding: .5em 1em 0;
 }
 #tutorial-description:empty{
 	display: none;
+}
+
+#tutorial-content{
+	padding: 0 1em;
+}
+#tutorial-content img, #tutorial-content picture, #tutorial-content iframe{
+	max-width: 100%;
+}
+#tutorial-content img:first-child:last-child, #tutorial-content picture:first-child:last-child, #tutorial-content iframe:first-child:last-child{
+	display: block;
+	margin: auto;
 }
