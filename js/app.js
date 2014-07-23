@@ -7,8 +7,6 @@ var tar = require('tar');
 var gui = require('nw.gui');
 var Notification = require('node-notifier');
 
-document.body.classList.add('current-page-home');
-
 app = {
 	set debug (state) {
 		this.isDebugActive = state;
@@ -65,6 +63,8 @@ app = {
 	notifier: new Notification(),
 
 	elems: {
+		logo: document.getElementById('logo'),
+
 		home: document.getElementById('home'),
 		local_tuts_list: document.getElementById('local-tuts-list'),
 		distant_tuts_list: document.getElementById('distant-tuts-list'),
@@ -84,6 +84,8 @@ app = {
 	distant_tutorials: [],
 
 	init: function () {
+		app.elems.logo.addEventListener('click', app.showHome, false);
+
 		app.retrieveTutorialsFromStorage();
 
 		/* Tutoriels locaux */
@@ -568,6 +570,14 @@ app = {
 		console.error('Erreur lors du téléchargement du tutoriel');
 	},
 
+	showHome: function() {
+		document.body.classList.remove('current-page-tutorial');
+		document.body.classList.add('current-page-home');
+
+		app.refreshLocalTutorials();
+		app.refreshDistantTutorials();
+	},
+
 	showTutorial: function(tutorial) {
 		console.dir(tutorial);
 
@@ -580,6 +590,7 @@ app = {
 }
 
 app.init();
+app.showHome();
 app.debug = true;
 app.window.setMinimumSize(320, 480);
 

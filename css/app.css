@@ -199,3 +199,6 @@ body:not(.current-page-tutorial) #tutorial{
 #tutorial>header{
 	padding: .5em;
 }
+#tutorial-description:empty{
+	display: none;
+}
