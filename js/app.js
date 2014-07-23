@@ -51,7 +51,7 @@ app = {
 	get debug() {
 		return this.isDebugActive;
 	},
-	isDebugActive: true,
+	isDebugActive: false,
 
 	title: 'ZdS Reader',
 
