@@ -18,12 +18,17 @@ body{
 		padding-top: calc(3.75em + 3px);
 	}
 }
+h1{
+	font-size: 2.2em;
+	font-weight: normal;
+	margin: 0;
+	color: #084561;
+}
 h2{
 	font-size: 2.2em;
 	font-weight: normal;
 	margin: 0;
 	color: #084561;
-	border-bottom: 1px solid #f8ad32;
 }
 h3{
 	font-size: 1.4em;
@@ -97,21 +102,42 @@ a{
 }
 
 .page-content{
-	display: none;
-	max-height: 100%;
+	position: absolute;
+	top: calc(3em + 3px);
+	right: 0;
+	bottom: 0;
+	left: 0;
 	overflow-y: auto;
+	-webkit-transition: all 200ms ease-in-out;
+	transition: all 200ms ease-in-out;
 }
+@media all and (min-height: 35em) {
+	.page-content{
+		top: calc(3.75em + 3px);
+	}
+}
+.page-content header{
+	border-bottom: 1px solid #f8ad32;
+}
+
+/* Home */
 .current-page-home #home{
-	display: block;
+	transform: none;
+}
+body:not(.current-page-home) #home{
+	-webkit-transform: translateX(-100%);
+	transform: translateX(-100%);
+}
+#home>header{
+	font: 0/0 a;
+	color: transparent;
+	text-shadow: none;
 }
 
 #local-tuts, #distant-tuts{
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
-	padding: 1em;
-}
-#local-tuts>h2, #distant-tuts>h2{
-
+	padding: 0 1em 1em;
 }
 #local-tuts-list, #distant-tuts-list{
 	margin: 0;
@@ -158,4 +184,18 @@ a{
 		float: left;
 		width: 50%;
 	}
+}
+
+
+
+
+/* Tutoriel */
+
+body:not(.current-page-tutorial) #tutorial{
+	-webkit-transform: translateX(100%);
+	transform: translateX(100%);
+}
+
+#tutorial>header{
+	padding: .5em;
 }

@@ -59,12 +59,20 @@ app = {
 	path: './',
 	api_url: 'http://zestedesavoir.com/',
 
+	page_transition_time: 200,
+
 	window: gui.Window.get(),
 	notifier: new Notification(),
 
 	elems: {
+		home: document.getElementById('home'),
 		local_tuts_list: document.getElementById('local-tuts-list'),
-		distant_tuts_list: document.getElementById('distant-tuts-list')
+		distant_tuts_list: document.getElementById('distant-tuts-list'),
+
+		tutorial: document.getElementById('tutorial'),
+		tutorial_title: document.getElementById('tutorial-title'),
+		tutorial_description: document.getElementById('tutorial-description'),
+		tutorial_content: document.getElementById('tutorial-content'),
 	},
 
 	tutorials: [],
@@ -315,11 +323,11 @@ app = {
 	},
 
 	writeLocalTutorialsListItem: function(li, tutorial) {
-		
+		li.addEventListener('click', app.showTutorial.bind(li, tutorial), false);
 	},
 
 	writeDistantTutorialsListItem: function(li, tutorial) {
-		li.addEventListener('click', app.retrieveTutorial.bind(li, tutorial.id, app.tutorialRetrieveSuccess, app.tutorialRetrieveError), false);
+		li.addEventListener('click', app.retrieveTutorial.bind(li, tutorial, app.tutorialRetrieveSuccess, app.tutorialRetrieveError), false);
 	},
 
 	writeLocalTutorialsListEmpty: function() {
@@ -406,6 +414,7 @@ app = {
 						tutorial.tags = manifest.tags || tutorial.tags || [];
 
 						app.writeTutorialsListItem(li, tutorial);
+						app.writeLocalTutorialsListItem(li, tutorial);
 
 						app.writeLocalTutorialsListEmpty();
 
@@ -414,9 +423,9 @@ app = {
 				})(li, tutorial);
 
 				app.elems.local_tuts_list.appendChild(li);
-
-				app.writeLocalTutorialsListEmpty();
 			}
+
+			app.writeLocalTutorialsListEmpty();
 
 			app.saveTutorials('local');
 
@@ -557,6 +566,16 @@ app = {
 
 	tutorialRetrieveError: function(tutorial) {
 		console.error('Erreur lors du téléchargement du tutoriel');
+	},
+
+	showTutorial: function(tutorial) {
+		console.dir(tutorial);
+
+		document.body.classList.remove('current-page-home');
+		document.body.classList.add('current-page-tutorial');
+
+		app.elems.tutorial_title.textContent = tutorial.title;
+		app.elems.tutorial_description.textContent = tutorial.description || '';
 	}
 }
 

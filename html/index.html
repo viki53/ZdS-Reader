@@ -11,19 +11,29 @@
 			<a href="./index.html" id="logo"><strong>ZdS Reader</strong></a>
 		</header>
 		
-		<main id="home" class="page-content">
-			<section id="local-tuts">
-				<h2>Tutoriels locaux</h2>
+		<div id="home" class="page-content">
+			<header><h1>Vos tutoriels</h1></header>
+			<article id="local-tuts">
+				<header><h2>Tutoriels locaux</h2></header>
 
 				<ul id="local-tuts-list"></ul>
-			</section>
+			</article>
 
-			<section id="distant-tuts">
-				<h2>Derniers tutoriels publiés</h2>
+			<article id="distant-tuts">
+				<header><h2>Derniers tutoriels publiés</h2></header>
 
 				<ul id="distant-tuts-list"></ul>
-			</section>
-		</main>
+			</article>
+		</div>
+
+		<div id="tutorial" class="page-content">
+			<header>
+				<h1 id="tutorial-title">Lire un tutoriel</h1>
+				<p id="tutorial-description"></p>
+			</header>
+
+			<div id="tutorial-content"></div>
+		</div>
 		<script src="../js/app.js"></script>
 	</body>
 </html>
