@@ -72,6 +72,8 @@ a{
 	background: #084561;
 	color: #fff;
 	border-bottom: 3px solid #f8ad32;
+	-webkit-user-select: none;
+	user-select: none;
 }
 #topbar::after, #content::after{
 	content: '';
