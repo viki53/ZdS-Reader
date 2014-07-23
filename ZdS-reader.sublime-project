@@ -3,11 +3,13 @@
 	[
 		{
 			"name": "Launch with Node-WebKit",
-			"shell_cmd": "/Applications/node-webkit.app/Contents/MacOS/node-webkit ./"
+			"shell_cmd": "/Applications/node-webkit.app/Contents/MacOS/node-webkit ./",
+			"working_dir": "${project_path:${folder}}"
 		},
 		{
 			"name": "Reset local data & launch",
-			"shell_cmd": "rm -R ./data/tutorials/* && /Applications/node-webkit.app/Contents/MacOS/node-webkit ./"
+			"shell_cmd": "rm -R ./data/tutorials/* && /Applications/node-webkit.app/Contents/MacOS/node-webkit ./",
+			"working_dir": "${project_path:${folder}}"
 		}
 	],
 	"folders":
