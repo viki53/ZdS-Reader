@@ -739,34 +739,38 @@ app = {
 			app.elems.tutorial_content.removeChild(app.elems.tutorial_content.firstChild);
 		}
 
+		var tut_fragment = document.createDocumentFragment();
+
 		var tut_introduction = document.createElement('header');
 		tut_introduction.className = 'tutorial-introduction';
 		tut_introduction.innerHTML = tutorial_content.introduction;
-		app.elems.tutorial_content.appendChild(tut_introduction);
+		tut_fragment.appendChild(tut_introduction);
 
 		if (tutorial_content.parts) {
 			for (var i=0, nb=tutorial_content.parts.length; i<nb; i++) {
 				var tut_part = app.writeTutorialPart(tutorial_content.parts[i]);
-				app.elems.tutorial_content.appendChild(tut_part);
+				tut_fragment.appendChild(tut_part);
 			}
 		}
 		else if (tutorial_content.chapters) {
 			for (var i=0, nb=tutorial_content.chapters.length; i<nb; i++) {
 				var tut_chapter = app.writeTutorialChapter(tutorial_content.chapters[i]);
-				app.elems.tutorial_content.appendChild(tut_chapter);
+				tut_fragment.appendChild(tut_chapter);
 			}
 		}
 		else if (tutorial_content.chapter && tutorial_content.chapter.extracts) {
 			for (var i=0, nb=tutorial_content.chapter.extracts.length; i<nb; i++) {
 				var tut_extract = app.writeTutorialExtract(tutorial_content.chapter.extracts[i]);
-				app.elems.tutorial_content.appendChild(tut_extract);
+				tut_fragment.appendChild(tut_extract);
 			}
 		}
 
 		var tut_conclusion = document.createElement('footer');
 		tut_introduction.className = 'tutorial-conclusion';
 		tut_conclusion.innerHTML = tutorial_content.conclusion;
-		app.elems.tutorial_content.appendChild(tut_conclusion);
+		tut_fragment.appendChild(tut_conclusion);
+		
+		app.elems.tutorial_content.appendChild(tut_fragment);
 	},
 
 	writeTutorialPart: function (part) {
@@ -833,7 +837,7 @@ app = {
 		});
 	},
 
-	loadTutorialPart: function(tutorial, tutorial_content, part, part_content, part_callback) {
+	loadTutorialPart: function(tutorial, tutorial_content, part, part_content, callback) {
 		if (app.debug) {
 			console.info('Chargement partie ' + part.pk);
 		}
@@ -844,7 +848,7 @@ app = {
 			app.loadTutorialFragment(tutorial, part.introduction, function(content) {
 				part_content.introduction = app.fixTutorialMarkdown(markdown.toHTML(content));
 				tutorial_content.files_loaded++;
-				// part_callback();
+				callback();
 			});
 		}
 
@@ -856,7 +860,7 @@ app = {
 				conclusion: ''
 			};
 
-			app.loadTutorialChapter(tutorial, tutorial_content, part.chapters[i], part_content.chapters[i], part_callback);
+			app.loadTutorialChapter(tutorial, tutorial_content, part.chapters[i], part_content.chapters[i], callback);
 		}
 
 		if (part.conclusion) {
@@ -865,12 +869,12 @@ app = {
 			app.loadTutorialFragment(tutorial, part.conclusion, function(content) {
 				part_content.conclusion = app.fixTutorialMarkdown(markdown.toHTML(content));
 				tutorial_content.files_loaded++;
-				// part_callback();
+				callback();
 			});
 		}
 	},
 
-	loadTutorialChapter: function(tutorial, tutorial_content, chapter, chapter_content, chapter_callback) {
+	loadTutorialChapter: function(tutorial, tutorial_content, chapter, chapter_content, callback) {
 		if (app.debug) {
 			console.info('Chargement chapitre ' + chapter.pk);
 		}
@@ -881,7 +885,7 @@ app = {
 			app.loadTutorialFragment(tutorial, chapter.introduction, function(content) {
 				chapter_content.introduction = app.fixTutorialMarkdown(markdown.toHTML(content));
 				tutorial_content.files_loaded++;
-				// chapter_callback();
+				callback();
 			});
 		}
 
@@ -891,7 +895,7 @@ app = {
 				content: ''
 			};
 
-			app.loadTutorialExtract(tutorial, tutorial_content, chapter.extracts[i], chapter_content.extracts[i], chapter_callback);
+			app.loadTutorialExtract(tutorial, tutorial_content, chapter.extracts[i], chapter_content.extracts[i], callback);
 		}
 
 		if (chapter.conclusion) {
@@ -900,12 +904,12 @@ app = {
 			app.loadTutorialFragment(tutorial, chapter.conclusion, function(content) {
 				chapter_content.conclusion = app.fixTutorialMarkdown(markdown.toHTML(content));
 				tutorial_content.files_loaded++;
-				// chapter_callback();
+				callback();
 			});
 		}
 	},
 
-	loadTutorialExtract: function(tutorial, tutorial_content, extract, extract_content, extract_callback) {
+	loadTutorialExtract: function(tutorial, tutorial_content, extract, extract_content, callback) {
 		if (app.debug) {
 			console.info('Chargement extrait ' + extract.pk);
 		}
@@ -917,9 +921,7 @@ app = {
 			
 			tutorial_content.files_loaded++;
 
-			console.log('Extrait chargé', tutorial_content);
-
-			extract_callback();
+			callback();
 		});
 	}
 }
