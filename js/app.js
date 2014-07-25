@@ -1,7 +1,7 @@
 
 var http = require('http');
 var request = require('request');
-var localStorage = require('localStorage')
+var localStorage = require('localStorage');
 var fs = require('fs');
 var marked = require('marked');
 marked.setOptions({
