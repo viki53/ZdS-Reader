@@ -15,8 +15,8 @@
 		"request" : "2.37.*",
 		"localStorage" : "1.0.*",
 		"markdown" : "0.5.*",
-		"tar" : "0.1.*",
-		"node-notifier": "3.0.*"
+		"tar" : "0.1.*"/*,
+		"node-notifier": "3.0.*"*/
 	},
 	"maintainers": [
 		{

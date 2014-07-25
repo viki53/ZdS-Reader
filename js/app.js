@@ -6,7 +6,7 @@ var fs = require('fs');
 var markdown = require('markdown').markdown;
 var tar = require('tar');
 var gui = require('nw.gui');
-var Notification = require('node-notifier');
+// var Notification = require('node-notifier');
 
 app = {
 	set debug (state) {
@@ -34,14 +34,11 @@ app = {
 			app.elems.dev_tools_btn = document.createElement('button');
 			app.elems.dev_tools_btn.textContent = 'DevTools';
 			app.elems.dev_tools_btn.addEventListener('click', app.openDevTools, false);
-
 			app.elems.debug_buttons.appendChild(app.elems.dev_tools_btn);
-
 
 			app.elems.refresh_btn = document.createElement('button');
 			app.elems.refresh_btn.textContent = 'Reload';
 			app.elems.refresh_btn.addEventListener('click', function() { window.location.reload() }, false);
-
 			app.elems.debug_buttons.appendChild(app.elems.refresh_btn);
 
 			document.body.appendChild(app.elems.debug_buttons);
@@ -61,7 +58,7 @@ app = {
 	page_transition_time: 200,
 
 	window: gui.Window.get(),
-	notifier: new Notification(),
+	// notifier: new Notification(),
 
 	elems: {
 		logo: document.getElementById('logo'),
@@ -769,7 +766,7 @@ app = {
 		tut_introduction.className = 'tutorial-conclusion';
 		tut_conclusion.innerHTML = tutorial_content.conclusion;
 		tut_fragment.appendChild(tut_conclusion);
-		
+
 		app.elems.tutorial_content.appendChild(tut_fragment);
 	},
 
