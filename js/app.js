@@ -3,17 +3,9 @@ var http = require('http');
 var request = require('request');
 var localStorage = require('localStorage');
 var fs = require('fs');
-var marked = require('marked');
-marked.setOptions({
-	renderer: new marked.Renderer(),
-	gfm: true,
-	tables: true,
-	breaks: false,
-	pedantic: false,
-	sanitize: true,
-	smartLists: true,
-	smartypants: false
-});
+
+var showdown_converter = new Showdown.converter({ extensions: ['github', 'table', 'zds'] });
+
 var tar = require('tar');
 var gui = require('nw.gui');
 // var Notification = require('node-notifier');
@@ -627,7 +619,7 @@ app = {
 	},
 
 	parseMarkdown: function(str) {
-		return marked(str).replace(/src=\"\/([^"]+)\"/gi, 'src="' + app.api_url + '$1"');
+		return showdown_converter.makeHtml(str).replace(/(src|href)=\"\/([^"]+)\"/gi, '$1="' + app.api_url + '$2"');
 	},
 
 	writeTutorialPage: function(tutorial, manifest) {
@@ -733,7 +725,7 @@ app = {
 
 	writeTutorialContent: function(tutorial_content) {
 		if (app.debug) {
-			console.info('Écriture tutoriel = "' + tutorial_content.title + '"');
+			console.info('Écriture tutoriel');
 		}
 		if (tutorial_content.files_loaded < tutorial_content.files_to_load) {
 			if (app.debug) {
@@ -833,7 +825,6 @@ app = {
 	},
 
 	loadTutorialFragment: function(tutorial, fragment, callback) {
-		console.dir(arguments);
 		fs.readFile(app.path + 'data/tutorials/' + tutorial.id + '/' + fragment, { encoding: 'UTF-8', flag: 'r' },	 function(err, content) {
 			if (err) {
 				console.error(err);
@@ -935,6 +926,7 @@ app = {
 
 app.init();
 app.showHome();
-app.debug = true;
+// app.debug = true;
+app.openDevTools();
 app.window.setMinimumSize(320, 480);
 

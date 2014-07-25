@@ -216,7 +216,7 @@ a{
 #tutorial-content img, #tutorial-content picture, #tutorial-content iframe{
 	max-width: 100%;
 }
-#tutorial-content img:first-child:last-child, #tutorial-content picture:first-child:last-child, #tutorial-content iframe:first-child:last-child{
+#tutorial-content p>img:first-child:last-child, #tutorial-content picture:first-child:last-child, #tutorial-content iframe:first-child:last-child{
 	display: block;
 	margin: auto;
 }
