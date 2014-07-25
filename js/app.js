@@ -3,7 +3,17 @@ var http = require('http');
 var request = require('request');
 var localStorage = require('localStorage')
 var fs = require('fs');
-var markdown = require('markdown').markdown;
+var marked = require('marked');
+marked.setOptions({
+	renderer: new marked.Renderer(),
+	gfm: true,
+	tables: true,
+	breaks: false,
+	pedantic: false,
+	sanitize: true,
+	smartLists: true,
+	smartypants: false
+});
 var tar = require('tar');
 var gui = require('nw.gui');
 // var Notification = require('node-notifier');
@@ -616,8 +626,8 @@ app = {
 		app.writeTutorialPage(tutorial);
 	},
 
-	fixTutorialMarkdown: function(str) {
-		return str.replace(/src=\"\/([^"]+)\"/gi, 'src="' + app.api_url + '$1"');
+	parseMarkdown: function(str) {
+		return marked(str).replace(/src=\"\/([^"]+)\"/gi, 'src="' + app.api_url + '$1"');
 	},
 
 	writeTutorialPage: function(tutorial, manifest) {
@@ -642,7 +652,7 @@ app = {
 				tutorial_content.files_to_load++;
 
 				app.loadTutorialFragment(tutorial, manifest.introduction, function (content) {
-					tutorial_content.introduction = app.fixTutorialMarkdown(markdown.toHTML(content));
+					tutorial_content.introduction = app.parseMarkdown(content);
 
 					tutorial_content.files_loaded++;
 
@@ -703,7 +713,7 @@ app = {
 				tutorial_content.files_to_load++;
 				
 				app.loadTutorialFragment(tutorial, manifest.conclusion, function (content) {
-					tutorial_content.conclusion = app.fixTutorialMarkdown(markdown.toHTML(content));
+					tutorial_content.conclusion = app.parseMarkdown(content);
 					tutorial_content.files_loaded++;
 
 					app.writeTutorialContent(tutorial_content);
@@ -843,7 +853,7 @@ app = {
 			tutorial_content.files_to_load++;
 			
 			app.loadTutorialFragment(tutorial, part.introduction, function(content) {
-				part_content.introduction = app.fixTutorialMarkdown(markdown.toHTML(content));
+				part_content.introduction = app.parseMarkdown(content);
 				tutorial_content.files_loaded++;
 				callback();
 			});
@@ -864,7 +874,7 @@ app = {
 			tutorial_content.files_to_load++;
 			
 			app.loadTutorialFragment(tutorial, part.conclusion, function(content) {
-				part_content.conclusion = app.fixTutorialMarkdown(markdown.toHTML(content));
+				part_content.conclusion = app.parseMarkdown(content);
 				tutorial_content.files_loaded++;
 				callback();
 			});
@@ -880,7 +890,7 @@ app = {
 			tutorial_content.files_to_load++;
 			
 			app.loadTutorialFragment(tutorial, chapter.introduction, function(content) {
-				chapter_content.introduction = app.fixTutorialMarkdown(markdown.toHTML(content));
+				chapter_content.introduction = app.parseMarkdown(content);
 				tutorial_content.files_loaded++;
 				callback();
 			});
@@ -899,7 +909,7 @@ app = {
 			tutorial_content.files_to_load++;
 			
 			app.loadTutorialFragment(tutorial, chapter.conclusion, function(content) {
-				chapter_content.conclusion = app.fixTutorialMarkdown(markdown.toHTML(content));
+				chapter_content.conclusion = app.parseMarkdown(content);
 				tutorial_content.files_loaded++;
 				callback();
 			});
@@ -914,7 +924,7 @@ app = {
 		tutorial_content.files_to_load++;
 
 		app.loadTutorialFragment(tutorial, extract.text, function(content) {
-			extract_content.content = app.fixTutorialMarkdown(markdown.toHTML(content));
+			extract_content.content = app.parseMarkdown(content);
 			
 			tutorial_content.files_loaded++;
 
