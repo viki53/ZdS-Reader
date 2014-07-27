@@ -5,25 +5,44 @@
 
 	var zds = function(converter) {
 		return [
-			// {
-			// 	type: 'output',
-			// 	regex: ' \|\|([^|]+)\|\| ',
-			// 	replace: function(key) {
-			// 		// console.dir(arguments);
-			// 		return '<kbd>' + key + '</kbd>';
-			// 		// return '<span class="keyboard">' + key + '</span>';
-			// 	}
-			// },
-			// {
-			// 	type: 'output',
-			// 	// regex: '(?:^|\n)\[\[information\]\](\n|$)',
-			// 	// regex: '(?:^|\n\r?)\[\[(information|question|erreur|attention)\]\]\n\r?(?:\| (.*)\n\r?)',
-			// 	regex: '\[\[(information|question|erreur|attention)\]\]\n(?:\| (.*)\n)',
-			// 	replace: function(type, content) {
-			// 		console.dir(arguments);
-			// 		return '<div class="' + type + '">' + converter.makeHtml(content) + '</div>';
-			// 	}
-			// }
+			{
+				/* Touches de clavier */
+				type: 'output',
+				filter: function(text) {
+					// return text.replace(/(?!\<code\>)(?=\<\/code\>)(?:[^\|]*)\|\|([^\|\|]+)\|\|(?:[^\|]*)(?!\<\code\>)/g, function(match, key) {
+					return text.replace(/(?:[^\|]*)\|\|([^\|\|]+)\|\|(?:[^\|]*)(?!\<\code\>)/g, function(match, key) {
+						return '<kbd>' + key + '</kbd>';
+					});
+				}
+			},
+			{
+				/* Blocs spéciaux */
+				type: 'language',
+				filter: function (text) {
+					console.log(text);
+					return text.replace(/\[\[(i|information|q|question|e|erreur|a|attention|s|secret)\]\]\n(((?:\|)(.*)(?:\n))+)/g, function(match, type, content) {
+
+						var types = {
+							'i': 'information',
+							'information': 'information',
+							'question': 'question',
+							'q': 'question',
+							'erreur': 'error',
+							'e': 'error',
+							'attention': 'warning',
+							'a': 'warning',
+							'secret': 'secret',
+							's': 'secret',
+						}
+
+						var content = content.split('\n').map(function(line){
+							return line.replace(/^\|(.*)/, '$1');
+						}).join('\n');
+
+						return '<div class="' + types[type] + '">' + showdown_converter.makeHtml(content.trim()) + '</div>';
+					})
+				}
+			}
 		];
 	};
 
