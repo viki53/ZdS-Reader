@@ -220,3 +220,34 @@ a{
 	display: block;
 	margin: auto;
 }
+
+.information, .question, .error, .warning{
+	position: relative;
+	margin: 2em 0;
+	padding: .5em 1em .5em 3em;
+}
+.information::before, .question::before, .error::before, .warning::before{
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 1.5em;
+	margin-top: -.75em;
+	margin-left: -.75em;
+	width: 1.5em;
+	height: 1.5em;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: contain;
+}
+.information{
+	background: #daeaee;
+}
+.question{
+	background: #e2daee;
+}
+.error{
+	background: #eedada;
+}
+.warning{
+	background: #eee7da;
+}

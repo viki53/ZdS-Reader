@@ -12,10 +12,10 @@
 		"icon": "img/logo-72x72.png"
 	},
 	"dependencies": {
-		"request" : "2.37.*",
-		"localStorage" : "1.0.*",
-		"showndown" : "0.3.*",
-		"tar" : "0.1.*"
+		"request": "2.37.*",
+		"localStorage": "1.0.*",
+		"tar": "0.1.*",
+		"highlight.js": "8.1.*"
 	},
 	"maintainers": [
 		{

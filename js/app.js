@@ -4,6 +4,7 @@ var request = require('request');
 var localStorage = require('localStorage');
 var fs = require('fs');
 
+var hljs = require("highlight.js");
 var showdown_converter = new Showdown.converter({ extensions: ['github', 'table', 'zds'] });
 
 var tar = require('tar');
@@ -769,6 +770,11 @@ app = {
 		tut_conclusion.innerHTML = tutorial_content.conclusion;
 		tut_fragment.appendChild(tut_conclusion);
 
+		var codes = tut_fragment.querySelectorAll('pre>code');
+		Array.prototype.forEach.call(codes, function(block) {
+			hljs.highlightBlock(block);
+		});
+
 		app.elems.tutorial_content.appendChild(tut_fragment);
 	},
 
@@ -819,7 +825,16 @@ app = {
 	writeTutorialExtract: function (extract, within_part) {
 		var tut_extract = document.createElement('section');
 		tut_extract.className = 'tutorial-extract';
-		tut_extract.innerHTML = extract.content;
+
+		var tut_extract_title = document.createElement('header');
+		tut_extract_title.className = 'tutorial-extract-title';
+		tut_extract_title.textContent = extract.title;
+		tut_extract.appendChild(tut_extract_title);
+
+		var tut_extract_content = document.createElement('div');
+		tut_extract_content.className = 'tutorial-extract-content';
+		tut_extract_content.innerHTML = extract.content;
+		tut_extract.appendChild(tut_extract_content);
 
 		return tut_extract;
 	},
