@@ -19,7 +19,6 @@
 				/* Blocs spéciaux */
 				type: 'language',
 				filter: function (text) {
-					console.log(text);
 					return text.replace(/\[\[(i|information|q|question|e|erreur|a|attention|s|secret)\]\]\n(((?:\|)(.*)(?:\n))+)/g, function(match, type, content) {
 
 						var types = {
