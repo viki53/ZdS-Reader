@@ -5,7 +5,7 @@ var localStorage = require('localStorage');
 var fs = require('fs');
 
 var hljs = require("highlight.js");
-var showdown_converter = new Showdown.converter({ extensions: ['github', 'table', 'zds'] });
+var showdown_converter = new Showdown.converter({ extensions: ['github', 'table', 'math', 'footnotes', 'zds'] });
 
 var tar = require('tar');
 var gui = require('nw.gui');
