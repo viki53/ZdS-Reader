@@ -7,10 +7,10 @@
 		return [
 			{
 				/* Touches de clavier */
-				type: 'output',
+				type: 'language',
 				filter: function(text) {
 					// return text.replace(/(?!\<code\>)(?=\<\/code\>)(?:[^\|]*)\|\|([^\|\|]+)\|\|(?:[^\|]*)(?!\<\code\>)/g, function(match, key) {
-					return text.replace(/(?:[^\|]*)\|\|([^\|\|]+)\|\|(?:[^\|]*)(?!\<\code\>)/g, function(match, key) {
+					return text.replace(/\|\|([^\|\|]+)\|\|/g, function(match, key) {
 						return '<kbd>' + key + '</kbd>';
 					});
 				}
@@ -20,7 +20,6 @@
 				type: 'language',
 				filter: function (text) {
 					return text.replace(/\[\[(i|information|q|question|e|erreur|a|attention|s|secret)\]\]\n(((?:\|)(.*)(?:\n))+)/g, function(match, type, content) {
-
 						var types = {
 							'i': 'information',
 							'information': 'information',
