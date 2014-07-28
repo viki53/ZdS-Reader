@@ -105,17 +105,14 @@ a{
 }
 
 .page-content{
-	position: absolute;
+	position: fixed;
 	top: calc(3em + 3px);
 	right: 0;
 	bottom: 0;
 	left: 0;
 	z-index: 0;
 	overflow-y: auto;
-	-webkit-transform: translateY(-100%);
-	transform: translateY(-100%);
-	-webkit-transition: all 200ms ease-in-out;
-	transition: all 200ms ease-in-out;
+	/*display: none;*/
 }
 @media all and (min-height: 35em) {
 	.page-content{
@@ -128,10 +125,8 @@ a{
 
 /* Home */
 .current-page-home #home{
-	-webkit-transform: none;
-	transform: none;
-	-webkit-transition-delay: 200ms;
-	transition-delay: 200ms;
+	/*display: block;*/
+	z-index: 1;
 }
 #home>header{
 	font: 0/0 a;
@@ -143,6 +138,22 @@ a{
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
 	padding: 0 1em 1em;
+	-webkit-transition: all 300ms ease-in-out;
+	transition: all 300ms ease-in-out;
+}
+#local-tuts{
+	-webkit-transform: translateX(-100%);
+	transform: translateX(-100%);
+}
+#distant-tuts{
+	-webkit-transform: translateX(100%);
+	transform: translateX(100%);
+}
+.current-page-home #local-tuts, .current-page-home #distant-tuts{
+	-webkit-transform: none;
+	transform: none;
+	-webkit-transition-delay: 150ms;
+	transition-delay: 150ms;
 }
 #local-tuts-list, #distant-tuts-list{
 	margin: 0;
@@ -196,27 +207,53 @@ a{
 
 /* Tutoriel */
 
-.current-page-tutorial #tutorial{
+#tutorial-map{
+	-webkit-transform: translateY(100%);
+	transform: translateY(100%);
+	-webkit-transition: all 300ms ease-in-out;
+	transition: all 300ms ease-in-out;
+}
+.current-page-tutorial-map #tutorial-map{
+	/*display: block;*/
+	z-index: 1;
 	-webkit-transform: none;
 	transform: none;
-	-webkit-transition-delay: 200ms;
-	transition-delay: 200ms;
+	-webkit-transition-delay: 150ms;
+	transition-delay: 150ms;
 }
 
-#tutorial>header{
+#tutorial-map>header{
 	padding: .5em 1em 0;
 }
 #tutorial-description:empty{
 	display: none;
 }
 
-#tutorial-content{
+
+#tutorial-extract{
+	-webkit-transform: translateX(100%);
+	transform: translateX(100%);
+	-webkit-transition: all 300ms ease-in-out;
+	transition: all 300ms ease-in-out;
+}
+.current-page-tutorial-extract #tutorial-extract{
+	/*display: block;*/
+	z-index: 1;
+	-webkit-transform: none;
+	transform: none;
+	-webkit-transition-delay: 150ms;
+	transition-delay: 150ms;
+}
+
+#tutorial-map-content, #tutorial-extract-content{
 	padding: 0 1em;
 }
-#tutorial-content img, #tutorial-content picture, #tutorial-content iframe{
+
+
+.markdown-content img, .markdown-content picture, .markdown-content iframe{
 	max-width: 100%;
 }
-#tutorial-content p>img:first-child:last-child, #tutorial-content picture:first-child:last-child, #tutorial-content iframe:first-child:last-child{
+.markdown-content p>img:first-child:last-child, .markdown-content picture:first-child:last-child, .markdown-content iframe:first-child:last-child{
 	display: block;
 	margin: auto;
 }
