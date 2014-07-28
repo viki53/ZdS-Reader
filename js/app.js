@@ -96,6 +96,7 @@ app = {
 		}
 
 		app.elems.logo.addEventListener('click', app.showHome, false);
+		document.getElementById('topbar-home-download-tutorial').addEventListener('click', app.downloadTutorial, false);
 
 		app.retrieveTutorialsFromStorage();
 
@@ -512,6 +513,33 @@ app = {
 			fs.unlink(dest);
 			if (error_callback) error_callback(err);
 		});
+	},
+
+	downloadTutorial: function() {
+		var prompt_tutorial_id = '';
+		var regexp_integer = /^([\d]+)$/i;
+		var regexp_url_tutorial = /(?:(?:http\:|https\:|)\/\/(?:www\.)?zestedesavoir\.com)?\/tutoriels\/(?:off\/)?([\d]+)\/(?:.*)/i;
+
+		do {
+			var prompt_tutorial_id = prompt('URL ou ID du tutoriel', prompt_tutorial_id);
+
+			prompt_tutorial_id.replace(regexp_url_tutorial, function() {
+				console.dir(arguments);
+				return this;
+			})
+			if (prompt_tutorial_id.match(regexp_integer)) {
+				var tutorial_id = parseInt(prompt_tutorial_id, 10);
+			}
+			else if (prompt_tutorial_id.match(regexp_url_tutorial)) {
+				var tutorial_id = parseInt(prompt_tutorial_id.replace(regexp_url_tutorial, '$1'), 10);
+				console.log(prompt_tutorial_id);
+				console.log(tutorial_id);
+			}
+		} while (prompt_tutorial_id !== null && !tutorial_id);
+
+		if (tutorial_id) {
+			app.retrieveTutorial(tutorial_id, app.tutorialRetrieveSuccess, app.tutorialRetrieveError);
+		}
 	},
 
 	retrieveTutorial: function(tutorial, callback, error_callback) {

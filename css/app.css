@@ -45,8 +45,23 @@ h3{
 a{
 	color: inherit;
 }
+button{
+	float: left;
+	display: block;
+	font-family: inherit;
+	font-size: inherit;
+	width: 3em;
+	height: 3em;
+	-webkit-appearance: none;
+	appearance: none;
+	color: inherit;
+	background: rgba(255, 255, 255, .05);
+	border: none;
+	cursor: pointer;
+}
 
 
+/* Barre constante */
 #topbar{
 	position: fixed;
 	top: 0;
@@ -87,7 +102,32 @@ a{
 	color: transparent;
 	text-shadow: none;
 }
+.topbar-actions{
+	float: right;
+}
+.topbar-actions>button{
+	float: left;
+	display: block;
+	width: 3em;
+	height: 3em;
+}
+@media all and (min-height: 35em) {
+	.topbar-actions>button{
+		width: 3.75em;
+		height: 3.75em;
+	}
+}
+.topbar-actions>button:hover{
+	background: #396a81;
+}
+.topbar-actions>button>span{
+	font: 0/0 a;
+	color: transparent;
+	text-shadow: none;
+}
 
+
+/* Contenu des pages */
 .page-content{
 	-webkit-box-sizing: border-box;
 	box-sizing: border-box;
