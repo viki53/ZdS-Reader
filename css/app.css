@@ -46,28 +46,6 @@ a{
 	color: inherit;
 }
 
-.alert-error, .alert-warning, .alert-success, .alert-info{
-	padding: 1em;
-	color: #fff;
-	border: 1px solid #fff;
-	border-radius: .25em;
-}
-.alert-error{
-	border-color: #e51c23;
-	background-color: #ed6166;
-}
-.alert-warning{
-	border-color: #ff9800;
-	background-color: #ffb74d;
-}
-.alert-success{
-	border-color: #42bd41;
-	background-color: #7ad179;
-}
-.alert-info{
-	border-color: #03a9f4;
-	background-color: #47c4fd;
-}
 
 #topbar{
 	position: fixed;
