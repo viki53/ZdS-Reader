@@ -891,10 +891,12 @@ app = {
 		if (app.debug) {
 			console.log('showTutorialPart', tutorial, part_content);
 		}
-		
+
 		app.clearTutorialExtractPage();
 
 		document.body.className = 'current-page-tutorial-extract';
+
+		app.elems.tutorial_extract_title.textContent = part_content.title;
 
 		var tut_part = document.createDocumentFragment();
 
@@ -933,6 +935,8 @@ app = {
 		app.clearTutorialExtractPage();
 
 		document.body.className = 'current-page-tutorial-extract';
+
+		app.elems.tutorial_extract_title.textContent = chapter_content.title;
 		
 		var tut_chapter = document.createDocumentFragment();
 
@@ -971,6 +975,8 @@ app = {
 		app.clearTutorialExtractPage();
 
 		document.body.className = 'current-page-tutorial-extract';
+
+		app.elems.tutorial_extract_title.textContent = extract_content.title;
 		
 		var tut_extract = document.createDocumentFragment();
 
