@@ -296,6 +296,10 @@ a{
 }
 .current-page-tutorial-extract #tutorial-summary header, .current-page-tutorial-extract #tutorial-summary footer{
 	display: none;
+	-webkit-transform-property: display;
+	transform-property: display;
+	-webkit-transition-delay: 300ms;
+	transition-delay: 300ms;
 }
 .current-page-tutorial-extract #tutorial-summary-content{
 	font-size: .5em;
@@ -306,6 +310,7 @@ a{
 .current-page-tutorial-extract #tutorial-extract{
 	z-index: 1;
 	left: 15em;
+	width: calc(100% - 15em);
 	-webkit-transform: none;
 	transform: none;
 	-webkit-transition-delay: 150ms;
