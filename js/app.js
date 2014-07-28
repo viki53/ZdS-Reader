@@ -523,17 +523,14 @@ app = {
 		do {
 			var prompt_tutorial_id = prompt('URL ou ID du tutoriel', prompt_tutorial_id);
 
-			prompt_tutorial_id.replace(regexp_url_tutorial, function() {
-				console.dir(arguments);
-				return this;
-			})
+			if (!prompt_tutorial_id) {
+				return;
+			}
 			if (prompt_tutorial_id.match(regexp_integer)) {
 				var tutorial_id = parseInt(prompt_tutorial_id, 10);
 			}
 			else if (prompt_tutorial_id.match(regexp_url_tutorial)) {
 				var tutorial_id = parseInt(prompt_tutorial_id.replace(regexp_url_tutorial, '$1'), 10);
-				console.log(prompt_tutorial_id);
-				console.log(tutorial_id);
 			}
 		} while (prompt_tutorial_id !== null && !tutorial_id);
 
@@ -599,7 +596,6 @@ app = {
 		app.writeTutorialsList(app.elems.local_tuts_list, app.local_tutorials, app.writeLocalTutorialsListItem, app.writeLocalTutorialsListEmpty);
 
 		var li = app.elems.distant_tuts_list.querySelector('li[data-tutorial-id="' + tutorial.id + '"]');
-		console.dir(li);
 		if (li && li.classList) {
 			li.classList.remove('loading');
 		}
