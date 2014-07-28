@@ -70,10 +70,10 @@ app = {
 		local_tuts_list: document.getElementById('local-tuts-list'),
 		distant_tuts_list: document.getElementById('distant-tuts-list'),
 
-		tutorial_map: document.getElementById('tutorial-map'),
+		tutorial_summary: document.getElementById('tutorial-summary'),
 		tutorial_title: document.getElementById('tutorial-title'),
 		tutorial_description: document.getElementById('tutorial-description'),
-		tutorial_map_content: document.getElementById('tutorial-map-content'),
+		tutorial_summary_content: document.getElementById('tutorial-summary-content'),
 
 		tutorial_extract: document.getElementById('tutorial-extract'),
 		tutorial_extract_title: document.getElementById('tutorial-extract-title'),
@@ -346,7 +346,7 @@ app = {
 	writeLocalTutorialsListEmpty: function() {
 		if (!app.elems.local_tuts_list.firstChild) {
 			app.elems.local_tuts_empty = document.createElement('p');
-			app.elems.local_tuts_empty.className = 'alert-warning list-empty';
+			app.elems.local_tuts_empty.className = 'warning list-empty';
 			app.elems.local_tuts_empty.textContent = 'Aucun tutoriel local';
 
 			app.elems.local_tuts_list.parentNode.appendChild(app.elems.local_tuts_empty);
@@ -364,7 +364,7 @@ app = {
 	writeDistantTutorialsListEmpty: function() {
 		if (!app.elems.distant_tuts_list.firstChild) {
 			app.elems.distant_tuts_empty = document.createElement('p');
-			app.elems.distant_tuts_empty.className = 'alert-warning list-empty';
+			app.elems.distant_tuts_empty.className = 'warning list-empty';
 			app.elems.distant_tuts_empty.textContent = 'Aucun tutoriel distant';
 
 			app.elems.distant_tuts_list.parentNode.appendChild(app.elems.distant_tuts_empty);
@@ -586,8 +586,8 @@ app = {
 			event.preventDefault();
 		}
 
-		if (document.body.classList.remove('current-page-tutorial-map') ) {
-			app.clearTutorialMapPage();
+		if (document.body.classList.remove('current-page-tutorial-summary') ) {
+			app.clearTutorialSummaryPage();
 		}
 		if (document.body.classList.remove('current-page-tutorial-extract') ) {
 			app.clearTutorialExtractPage();
@@ -601,7 +601,8 @@ app = {
 
 	showTutorial: function(tutorial) {
 		document.body.classList.remove('current-page-home');
-		document.body.classList.add('current-page-tutorial-map');
+		document.body.classList.remove('current-page-tutorial-extract');
+		document.body.classList.add('current-page-tutorial-summary');
 
 		(function(tutorial) {
 			fs.readFile(app.path + 'data/tutorials/' + tutorial.id + '/manifest.json', { encoding: 'UTF-8', flag: 'r' },	 function(err, manifest) {
@@ -618,20 +619,20 @@ app = {
 				tutorial.license = manifest.license || tutorial.license || 'N/A';
 				tutorial.tags = manifest.tags || tutorial.tags || [];
 
-				app.writeTutorialPage(tutorial, manifest);
+				app.writeTutorialSummaryPage(tutorial, manifest);
 
 				app.saveTutorials('none');
 			});
 		})(tutorial);
 
-		app.writeTutorialPage(tutorial);
+		app.writeTutorialSummaryPage(tutorial);
 	},
 
 	parseMarkdown: function(str) {
 		return showdown_converter.makeHtml(str).replace(/(src|href)=\"\/([^"]+)\"/gi, '$1="' + app.api_url + '$2"');
 	},
 
-	writeTutorialPage: function(tutorial, manifest) {
+	writeTutorialSummaryPage: function(tutorial, manifest) {
 		if (app.debug) {
 			console.info('Page tutoriel ' + tutorial.id);
 		}
@@ -657,7 +658,7 @@ app = {
 
 					tutorial_content.files_loaded++;
 
-					app.writeTutorialMap(tutorial_content);
+					app.elems.tutorial_summary_content.appendChild(app.writeTutorialSummary(tutorial, tutorial_content));
 				});
 			}
 
@@ -735,37 +736,33 @@ app = {
 					tutorial_content.conclusion = app.parseMarkdown(content);
 					tutorial_content.files_loaded++;
 
-					app.writeTutorialMap(tutorial_content);
+					app.elems.tutorial_summary_content.appendChild(app.writeTutorialSummary(tutorial, tutorial_content));
 				});
 			}
 
-			app.writeTutorialMap(tutorial_content);
+			app.elems.tutorial_summary_content.appendChild(app.writeTutorialSummary(tutorial, tutorial_content));
 		}
 	},
 
-	clearTutorialMapPage: function() {
+	clearTutorialSummaryPage: function() {
 		app.elems.tutorial_title.textContent = '';
 		app.elems.tutorial_description.textContent = '';
 
-		while (app.elems.tutorial_content.firstChild) {
-			app.elems.tutorial_content.removeChild(app.elems.tutorial_content.firstChild);
+		app.clearTutorialSummaryContent();
+	},
+
+	clearTutorialSummaryContent: function() {
+		while (app.elems.tutorial_summary_content.firstChild) {
+			app.elems.tutorial_summary_content.removeChild(app.elems.tutorial_summary_content.firstChild);
 		}
 	},
 
-	writeTutorialMap: function(tutorial_content) {
+	writeTutorialSummary: function(tutorial, tutorial_content) {
 		if (app.debug) {
 			console.info('Écriture plan tutoriel', tutorial_content);
 		}
-		if (tutorial_content.files_loaded < tutorial_content.files_to_load) {
-			if (app.debug) {
-				console.log('Tous les fichiers ne sont pas chargés (' + tutorial_content.files_loaded + '/' + tutorial_content.files_to_load + ')');
-			}
-			return false;
-		}
 
-		while (app.elems.tutorial_map_content.firstChild) {
-			app.elems.tutorial_map_content.removeChild(app.elems.tutorial_map_content.firstChild);
-		}
+		app.clearTutorialSummaryContent();
 
 		var tut_fragment = document.createDocumentFragment();
 
@@ -780,7 +777,7 @@ app = {
 			var list_parts = document.createElement('ol');
 
 			for (var i=0, nb=tutorial_content.parts.length; i<nb; i++) {
-				var tut_part = app.writeTutorialMapPart(tutorial_content.parts[i], title_level);
+				var tut_part = app.writeTutorialSummaryPart(tutorial, tutorial_content, tutorial_content.parts[i], title_level);
 				list_parts.appendChild(tut_part);
 			}
 			tut_fragment.appendChild(list_parts);
@@ -789,7 +786,7 @@ app = {
 			var list_chapters = document.createElement('ol');
 
 			for (var i=0, nb=tutorial_content.chapters.length; i<nb; i++) {
-				var tut_chapter = app.writeTutorialMapChapter(tutorial_content.chapters[i], title_level);
+				var tut_chapter = app.writeTutorialSummaryChapter(tutorial, tutorial_content, tutorial_content.chapters[i], title_level);
 				list_chapters.appendChild(tut_chapter);
 			}
 			tut_fragment.appendChild(list_chapters);
@@ -798,7 +795,7 @@ app = {
 			var list_extracts = document.createElement('ol');
 
 			for (var i=0, nb=tutorial_content.chapter.extracts.length; i<nb; i++) {
-				var tut_extract = app.writeTutorialMapExtract(tutorial_content.chapter.extracts[i], title_level);
+				var tut_extract = app.writeTutorialSummaryExtract(tutorial, tutorial_content, tutorial_content.chapter.extracts[i], title_level);
 				list_extracts.appendChild(tut_extract);
 			}
 			tut_fragment.appendChild(list_extracts);
@@ -811,19 +808,19 @@ app = {
 
 		var codes = tut_fragment.querySelectorAll('pre>code');
 		Array.prototype.forEach.call(codes, function(block) {
-			// hljs.highlightBlock(block);
+			hljs.highlightBlock(block);
 		});
 
-		app.elems.tutorial_map_content.appendChild(tut_fragment);
+		return tut_fragment;
 	},
 
-	writeTutorialMapPart: function(part_content, title_level) {
+	writeTutorialSummaryPart: function(tutorial, tutorial_content, part_content, title_level) {
 		var tut_part = document.createElement('li');
 
 		if (part_content.title) {
 			var title = document.createElement('h' + title_level);
 			title.textContent = part_content.title;
-
+			title.addEventListener('click', app.showTutorialPart.bind(title, tutorial, tutorial_content, part_content), false);
 			tut_part.appendChild(title);
 		}
 
@@ -832,7 +829,7 @@ app = {
 			var list_chapters = document.createElement('ol');
 
 			for (var i=0, nb=part_content.chapters.length; i<nb; i++) {
-				var tut_chapter = app.writeTutorialMapChapter(part_content.chapters[i], title_level);
+				var tut_chapter = app.writeTutorialSummaryChapter(tutorial, tutorial_content, part_content.chapters[i], title_level);
 				list_chapters.appendChild(tut_chapter);
 			}
 			tut_part.appendChild(list_chapters);
@@ -841,13 +838,13 @@ app = {
 		return tut_part;
 	},
 
-	writeTutorialMapChapter: function(chapter_content, title_level) {
+	writeTutorialSummaryChapter: function(tutorial, tutorial_content, chapter_content, title_level) {
 		var tut_chapter = document.createElement('li');
 
 		if (chapter_content.title) {
 			var title = document.createElement('h' + title_level);
 			title.textContent = chapter_content.title;
-
+			title.addEventListener('click', app.showTutorialChapter.bind(title, tutorial, tutorial_content, chapter_content), false);
 			tut_chapter.appendChild(title);
 		}
 
@@ -856,7 +853,7 @@ app = {
 			var list_extracts = document.createElement('ol');
 
 			for (var i=0, nb=chapter_content.extracts.length; i<nb; i++) {
-				var tut_extract = app.writeTutorialMapExtract(chapter_content.extracts[i], title_level);
+				var tut_extract = app.writeTutorialSummaryExtract(tutorial, tutorial_content, chapter_content.extracts[i], title_level);
 				list_extracts.appendChild(tut_extract);
 			}
 			tut_chapter.appendChild(list_extracts);
@@ -865,20 +862,95 @@ app = {
 		return tut_chapter;
 	},
 
-	writeTutorialMapExtract: function(extract_content, title_level) {
+	writeTutorialSummaryExtract: function(tutorial, tutorial_content, extract_content, title_level) {
 		var tut_extract = document.createElement('li');
 
 		if (extract_content.title) {
 			var title = document.createElement('h' + title_level);
 			title.textContent = extract_content.title;
-
+			title.addEventListener('click', app.showTutorialExtract.bind(title, tutorial, tutorial_content, extract_content), false);
 			tut_extract.appendChild(title);
 		}
 
 		return tut_extract;
 	},
 
-	writeTutorialContent: function(tutorial_content) {
+	clearTutorialExtractPage: function() {
+		app.elems.tutorial_extract_title.textContent = '';
+
+		app.clearTutorialExtractContent();
+	},
+
+	clearTutorialExtractContent: function() {
+		while (app.elems.tutorial_extract_content.firstChild) {
+			app.elems.tutorial_extract_content.removeChild(app.elems.tutorial_extract_content.firstChild);
+		}
+	},
+
+	showTutorialPart: function(tutorial, tutorial_content, part_content) {
+		console.log('showTutorialPart', tutorial, part_content);
+
+		app.clearTutorialExtractPage();
+
+		document.body.className = 'current-page-tutorial-extract';
+
+		var tut_part = document.createDocumentFragment();
+
+		var back_to_summary = document.createElement('button');
+		back_to_summary.textContent = 'Retour au sommaire';
+		back_to_summary.addEventListener('click', app.showTutorial.bind(back_to_summary, tutorial), false);
+		tut_part.appendChild(back_to_summary);
+
+		var tut_part_content = app.writeTutorialPart(tutorial, tutorial_content, part_content);
+
+		tut_part.appendChild(tut_part_content);
+
+		app.elems.tutorial_extract_content.appendChild(tut_part);
+	},
+
+	showTutorialChapter: function(tutorial, tutorial_content, chapter_content) {
+		console.log('showTutorialChapter', tutorial, chapter_content);
+
+		app.clearTutorialExtractPage();
+
+		document.body.className = 'current-page-tutorial-extract';
+		
+		var tut_chapter = document.createDocumentFragment();
+
+		var back_to_summary = document.createElement('button');
+		back_to_summary.textContent = 'Retour au sommaire';
+		back_to_summary.addEventListener('click', app.showTutorial.bind(back_to_summary, tutorial), false);
+		tut_chapter.appendChild(back_to_summary);
+
+		var tut_chapter_content = app.writeTutorialChapter(tutorial, tutorial_content, chapter_content);
+
+		tut_chapter.appendChild(tut_chapter_content);
+
+		app.elems.tutorial_extract_content.appendChild(tut_chapter);
+	},
+
+	showTutorialExtract: function(tutorial, tutorial_content, extract_content) {
+		console.log('showTutorialExtract', tutorial, extract_content);
+
+		app.clearTutorialExtractPage();
+
+		document.body.className = 'current-page-tutorial-extract';
+		
+		var tut_extract = document.createDocumentFragment();
+
+		var back_to_summary = document.createElement('button');
+		back_to_summary.textContent = 'Retour au sommaire';
+		back_to_summary.addEventListener('click', app.showTutorial.bind(back_to_summary, tutorial), false);
+		tut_extract.appendChild(back_to_summary);
+
+		var tut_extract_content = app.writeTutorialExtract(tutorial, tutorial_content, extract_content);
+
+		tut_extract.appendChild(tut_extract_content);
+
+		app.elems.tutorial_extract_content.appendChild(tut_extract);
+	},
+
+	writeTutorialContent: function(tutorial, tutorial_content) {
 		if (app.debug) {
 			console.info('Écriture tutoriel', tutorial_content);
 		}
@@ -902,19 +974,19 @@ app = {
 
 		if (tutorial_content.parts) {
 			for (var i=0, nb=tutorial_content.parts.length; i<nb; i++) {
-				var tut_part = app.writeTutorialPart(tutorial_content.parts[i]);
+				var tut_part = app.writeTutorialPart(tutorial, tutorial_content, tutorial_content.parts[i]);
 				tut_fragment.appendChild(tut_part);
 			}
 		}
 		else if (tutorial_content.chapters) {
 			for (var i=0, nb=tutorial_content.chapters.length; i<nb; i++) {
-				var tut_chapter = app.writeTutorialChapter(tutorial_content.chapters[i]);
+				var tut_chapter = app.writeTutorialChapter(tutorial, tutorial_content, tutorial_content.chapters[i]);
 				tut_fragment.appendChild(tut_chapter);
 			}
 		}
 		else if (tutorial_content.chapter && tutorial_content.chapter.extracts) {
 			for (var i=0, nb=tutorial_content.chapter.extracts.length; i<nb; i++) {
-				var tut_extract = app.writeTutorialExtract(tutorial_content.chapter.extracts[i]);
+				var tut_extract = app.writeTutorialExtract(tutorial, tutorial_content, tutorial_content.chapter.extracts[i]);
 				tut_fragment.appendChild(tut_extract);
 			}
 		}
@@ -932,52 +1004,78 @@ app = {
 		app.elems.tutorial_content.appendChild(tut_fragment);
 	},
 
-	writeTutorialPart: function (part) {
+	writeTutorialPart: function (tutorial, tutorial_content, part_content, title_level) {
 		var tut_part = document.createElement('article');
 		tut_part.className = 'tutorial-part';
 
-		var tut_part_introduction = document.createElement('header');
-		tut_part_introduction.className = 'tutorial-part-introduction';
-		tut_part_introduction.innerHTML = part.introduction;
-		tut_part.appendChild(tut_part_introduction);
+		var tut_part_header = document.createElement('header');
 
-		for (var i=0, nb=part.chapters.length; i<nb; i++) {
-			var tut_chapter = app.writeTutorialChapter(part.chapters[i], true);
-			tut_part.appendChild(tut_chapter);
+		var tut_part_title = document.createElement('h1');
+		tut_part_title.innerHTML = part_content.title;
+		tut_part_header.appendChild(tut_part_title);
+
+		var tut_part_introduction = document.createElement('div');
+		tut_part_introduction.className = 'tutorial-part-introduction';
+		tut_part_introduction.innerHTML = part_content.introduction;
+		tut_part_header.appendChild(tut_part_introduction);
+
+		tut_part.appendChild(tut_part_header);
+
+		if (part_content.chapters) {
+			if (typeof title_level === 'undefined') {
+				title_level = 1;
+			}
+			title_level++;
+			var list_chapters = document.createElement('ol');
+
+			for (var i=0, nb=part_content.chapters.length; i<nb; i++) {
+				var tut_chapter = app.writeTutorialSummaryChapter(tutorial, tutorial_content, part_content.chapters[i], title_level);
+				list_chapters.appendChild(tut_chapter);
+			}
+			tut_part.appendChild(list_chapters);
 		}
 
 		var tut_part_conclusion = document.createElement('footer');
 		tut_part_conclusion.className = 'tutorial-part-conclusion';
-		tut_part_conclusion.innerHTML = part.conclusion;
+		tut_part_conclusion.innerHTML = part_content.conclusion;
 		tut_part.appendChild(tut_part_conclusion);
 
 		return tut_part;
 	},
 
-	writeTutorialChapter: function (chapter, within_part) {
-		var tut_chapter = document.createElement(within_part ? 'section' : 'article');
+	writeTutorialChapter: function (tutorial, tutorial_content, chapter_content) {
+		var tut_chapter = document.createElement('article');
 		tut_chapter.className = 'tutorial-chapter';
 
 		var tut_chapter_introduction = document.createElement('header');
 		tut_chapter_introduction.className = 'tutorial-chapter-introduction';
-		tut_chapter_introduction.innerHTML = chapter.introduction;
+		tut_chapter_introduction.innerHTML = chapter_content.introduction;
 		tut_chapter.appendChild(tut_chapter_introduction);
 
-		for (var i=0, nb=chapter.extracts.length; i<nb; i++) {
-			var tut_extract = app.writeTutorialExtract(chapter.extracts[i]);
-			tut_chapter.appendChild(tut_extract);
+		if (chapter_content.extracts) {
+			if (typeof title_level === 'undefined') {
+				title_level = 1;
+			}
+			title_level++;
+			var list_extracts = document.createElement('ol');
+
+			for (var i=0, nb=chapter_content.extracts.length; i<nb; i++) {
+				var tut_extract = app.writeTutorialSummaryExtract(tutorial, tutorial_content, chapter_content.extracts[i], title_level);
+				list_extracts.appendChild(tut_extract);
+			}
+			tut_chapter.appendChild(list_extracts);
 		}
 
 		var tut_chapter_conclusion = document.createElement('footer');
 		tut_chapter_conclusion.className = 'tutorial-chapter-conclusion';
-		tut_chapter_conclusion.innerHTML = chapter.conclusion;
+		tut_chapter_conclusion.innerHTML = chapter_content.conclusion;
 		tut_chapter.appendChild(tut_chapter_conclusion);
 
 		return tut_chapter;
 	},
 
-	writeTutorialExtract: function (extract, within_part) {
-		var tut_extract = document.createElement('section');
+	writeTutorialExtract: function (tutorial, tutorial_content, extract) {
+		var tut_extract = document.createElement('article');
 		tut_extract.className = 'tutorial-extract';
 
 		var tut_extract_title = document.createElement('header');
@@ -1001,94 +1099,6 @@ app = {
 			}
 
 			callback(content);
-		});
-	},
-
-	loadTutorialPart: function(tutorial, tutorial_content, part, part_content, callback) {
-		if (app.debug) {
-			console.info('Chargement partie ' + part.pk);
-		}
-
-		if (part.introduction) {
-			tutorial_content.files_to_load++;
-			
-			app.loadTutorialFragment(tutorial, part.introduction, function(content) {
-				part_content.introduction = app.parseMarkdown(content);
-				tutorial_content.files_loaded++;
-				callback();
-			});
-		}
-
-		for (var i=0, nb=part.chapters.length; i<nb; i++) {
-			part_content.chapters[i] = {
-				title: part.chapters[i].title,
-				introduction: '',
-				extracts: [],
-				conclusion: ''
-			};
-
-			app.loadTutorialChapter(tutorial, tutorial_content, part.chapters[i], part_content.chapters[i], callback);
-		}
-
-		if (part.conclusion) {
-			tutorial_content.files_to_load++;
-			
-			app.loadTutorialFragment(tutorial, part.conclusion, function(content) {
-				part_content.conclusion = app.parseMarkdown(content);
-				tutorial_content.files_loaded++;
-				callback();
-			});
-		}
-	},
-
-	loadTutorialChapter: function(tutorial, tutorial_content, chapter, chapter_content, callback) {
-		if (app.debug) {
-			console.info('Chargement chapitre ' + chapter.pk);
-		}
-
-		if (chapter.introduction) {
-			tutorial_content.files_to_load++;
-			
-			app.loadTutorialFragment(tutorial, chapter.introduction, function(content) {
-				chapter_content.introduction = app.parseMarkdown(content);
-				tutorial_content.files_loaded++;
-				callback();
-			});
-		}
-
-		for (var i=0, nb=chapter.extracts.length; i<nb; i++) {
-			chapter_content.extracts[i] = {
-				title: chapter.extracts[i].title,
-				content: ''
-			};
-
-			app.loadTutorialExtract(tutorial, tutorial_content, chapter.extracts[i], chapter_content.extracts[i], callback);
-		}
-
-		if (chapter.conclusion) {
-			tutorial_content.files_to_load++;
-			
-			app.loadTutorialFragment(tutorial, chapter.conclusion, function(content) {
-				chapter_content.conclusion = app.parseMarkdown(content);
-				tutorial_content.files_loaded++;
-				callback();
-			});
-		}
-	},
-
-	loadTutorialExtract: function(tutorial, tutorial_content, extract, extract_content, callback) {
-		if (app.debug) {
-			console.info('Chargement extrait ' + extract.pk);
-		}
-
-		tutorial_content.files_to_load++;
-
-		app.loadTutorialFragment(tutorial, extract.text, function(content) {
-			extract_content.content = app.parseMarkdown(content);
-			
-			tutorial_content.files_loaded++;
-
-			callback();
 		});
 	}
 }

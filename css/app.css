@@ -18,6 +18,12 @@ body{
 		padding-top: calc(3.75em + 3px);
 	}
 }
+header>:first-child, footer>:first-child{
+	margin-top: 0;
+}
+header>:last-child, footer>:last-child{
+	margin-bottom: 0;
+}
 h1{
 	font-size: 2.2em;
 	font-weight: normal;
@@ -34,7 +40,7 @@ h3{
 	font-size: 1.4em;
 	font-weight: normal;
 	margin: 0;
-	color: #424242;
+	color: #084561;
 }
 a{
 	color: inherit;
@@ -105,27 +111,37 @@ a{
 }
 
 .page-content{
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
 	position: fixed;
 	top: calc(3em + 3px);
 	right: 0;
 	bottom: 0;
 	left: 0;
+	height: calc(100% - 3em - 3px);
+	width: 100%;
 	z-index: 0;
 	overflow-y: auto;
-	/*display: none;*/
 }
 @media all and (min-height: 35em) {
 	.page-content{
 		top: calc(3.75em + 3px);
+		height: calc(100% - 3.75em - 3px);
 	}
 }
 .page-content header{
+	padding: 1em;
 	border-bottom: 1px solid #f8ad32;
+}
+.page-content footer{
+	border-top: 1px solid #f8ad32;
+}
+.page-content header:empty, .page-content footer:empty{
+	display: none;
 }
 
 /* Home */
 .current-page-home #home{
-	/*display: block;*/
 	z-index: 1;
 }
 #home>header{
@@ -207,14 +223,13 @@ a{
 
 /* Tutoriel */
 
-#tutorial-map{
+#tutorial-summary{
 	-webkit-transform: translateY(100%);
 	transform: translateY(100%);
 	-webkit-transition: all 300ms ease-in-out;
 	transition: all 300ms ease-in-out;
 }
-.current-page-tutorial-map #tutorial-map{
-	/*display: block;*/
+.current-page-tutorial-summary #tutorial-summary{
 	z-index: 1;
 	-webkit-transform: none;
 	transform: none;
@@ -222,11 +237,44 @@ a{
 	transition-delay: 150ms;
 }
 
-#tutorial-map>header{
-	padding: .5em 1em 0;
+#tutorial-summary-content{
+	-webkit-transition: font-size 300ms ease-in-out;
+	transition: font-size 300ms ease-in-out;
+}
+#tutorial-summary-content>header{
+	padding: 1rem;
+	margin-bottom: 2em;
+}
+#tutorial-summary-content>footer{
+	padding: 1rem;
+	margin-top: 2em;
 }
 #tutorial-description:empty{
 	display: none;
+}
+#tutorial-summary-content ol{
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+#tutorial-summary-content h1, #tutorial-summary-content h2, #tutorial-summary-content h3{
+	padding: 1rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: pointer;
+}
+#tutorial-summary-content h1{
+	border-bottom: 1px solid #f8ad32;
+}
+#tutorial-summary-content h2{
+	padding-left: 2rem;
+}
+#tutorial-summary-content h3{
+	padding-left: 4rem;
+}
+#tutorial-summary-content h1:hover, #tutorial-summary-content h2:hover, #tutorial-summary-content h3:hover{
+	background-color: #fff;
 }
 
 
@@ -236,9 +284,28 @@ a{
 	-webkit-transition: all 300ms ease-in-out;
 	transition: all 300ms ease-in-out;
 }
-.current-page-tutorial-extract #tutorial-extract{
-	/*display: block;*/
+.current-page-tutorial-extract #tutorial-summary{
 	z-index: 1;
+	right: auto;
+	width: 15em;
+	border-right: 1px solid #f8ad32;
+	-webkit-transform: none;
+	transform: none;
+	-webkit-transition-delay: 150ms;
+	transition-delay: 150ms;
+}
+.current-page-tutorial-extract #tutorial-summary header, .current-page-tutorial-extract #tutorial-summary footer{
+	display: none;
+}
+.current-page-tutorial-extract #tutorial-summary-content{
+	font-size: .5em;
+}
+.current-page-tutorial-extract #tutorial-summary-content h1, .current-page-tutorial-extract #tutorial-summary-content h2, .current-page-tutorial-extract #tutorial-summary-content h3{
+	padding: .5rem;
+}
+.current-page-tutorial-extract #tutorial-extract{
+	z-index: 1;
+	left: 15em;
 	-webkit-transform: none;
 	transform: none;
 	-webkit-transition-delay: 150ms;
