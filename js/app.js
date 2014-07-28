@@ -98,6 +98,13 @@ app = {
 		app.elems.logo.addEventListener('click', app.showHome, false);
 		document.getElementById('topbar-home-download-tutorial').addEventListener('click', app.downloadTutorial, false);
 
+		if (!fs.existsSync(app.path + 'data/')) {
+			fs.mkdirSync(app.path + 'data/');
+		}
+		if (!fs.existsSync(app.path + 'data/tutorials/')) {
+			fs.mkdirSync(app.path + 'data/tutorials/');
+		}
+
 		app.retrieveTutorialsFromStorage();
 
 		/* Tutoriels locaux */
@@ -111,6 +118,8 @@ app = {
 		app.writeTutorialsList(app.elems.distant_tuts_list, app.distant_tutorials, app.writeDistantTutorialsListItem, app.writeDistantTutorialsListEmpty);
 
 		app.refreshDistantTutorials();
+
+		app.loaded = true;
 	},
 
 	openDevTools: function() {
