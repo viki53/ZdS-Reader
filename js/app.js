@@ -502,7 +502,7 @@ app = {
 
 		tutorial.title = article.querySelector('h3').textContent || tutorial.title || "";
 		tutorial.url = article.querySelector('a').getAttribute('href').trim() || tutorial.url || "";
-		tutorial.thumbnail = article.querySelector('img.tutorial-img').getAttribute('src').replace(/^\/(.*)$/i, app.api_url + '$1') || tutorial.thumbnail || "";
+		tutorial.thumbnail = article.querySelector('img.tutorial-img') ? article.querySelector('img.tutorial-img').getAttribute('src').replace(/^\/(.*)$/i, app.api_url + '$1') : tutorial.thumbnail || "";
 		tutorial.image = tutorial.thumbnail.replace(/(.60x60_q85_crop.)(png|jpg|gif)$/i, '') || tutorial.image || "";
 		tutorial.tags = article.querySelector('.article-metadata').textContent.trim().split('\n').map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 0; }) || tutorial.tags || "";
 
